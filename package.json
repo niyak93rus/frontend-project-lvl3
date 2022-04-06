@@ -1,0 +1,27 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "frontend project level 3",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niyak93rus/frontend-project-lvl3.git"
+  },
+  "keywords": [
+    "frontend",
+    "learning",
+    "rss",
+    "project",
+    "study"
+  ],
+  "author": "niyak93rus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/niyak93rus/frontend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/niyak93rus/frontend-project-lvl3#readme"
+}
