@@ -33,35 +33,12 @@ jobs:
       - run: make install
       - run: make lint
       - run: make test
-      # - name: Test & publish code coverage
-      #   # Publish code coverage on Code Climate
-      #   # https://github.com/paambaati/codeclimate-action
-      #   uses: paambaati/codeclimate-action@v3
-      #   # Add Code Climate secret key
-      #   env:
-      #     CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      #   with:
-      #     coverageCommand: make test-coverage
-      #     debug: true
-    - name: Install dependencies
-      run: make
-      
-    - name: Run check
-      run: make check
-      
-    - name: Run distcheck
-      run: make distcheck
-      
-    eslint:
-      runs-on: ubuntu-latest
-            steps:
-      - uses: actions/checkout@v2
-      - uses: mrdivyansh/eslint-action@1.0.7
-        # GITHUB_TOKEN in forked repositories is read-only
-        # https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
-        if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }} 
-        with:
-          repo-token: ${{secrets.GITHUB_TOKEN}}
-          eslint-rc: .eslintrc.js
-          execute-on-files:
-            - ./packages
+
+      - name: Install dependencies
+        run: make
+
+      - name: Run check
+        run: make check
+
+      - name: Run distcheck
+        run: make distcheck
