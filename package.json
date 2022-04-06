@@ -4,6 +4,9 @@
   "description": "frontend project level 3",
   "main": "index.js",
   "type": "module",
+  "bin": {
+    "index": "bin/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
