@@ -1,5 +1,5 @@
 # Name of workflow
-name: Node CI
+name: Project CI
 
 # Trigger the workflow on push or pull request
 on:
