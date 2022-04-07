@@ -9,3 +9,5 @@
 
 ### Deployed on Vercel:
 https://frontend-project-lvl3-lnu6ga8do-niyak93rus.vercel.app/
+
+This is a simple RSS-reader application made during by learning on Hexlet(https://ru.hexlet.io/) Frontend-developer course
