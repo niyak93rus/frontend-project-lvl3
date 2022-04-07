@@ -10,20 +10,23 @@
 <body>
   <main>
       <section class="container-fluid bg-dark p-5">
-        <div class="container mx-auto" style="margin-top: 200px; width: 600px;">
+        <div class="col-md-10 col-lg-8 mx-auto text-white">
           <h1 class="display-3 mb-0 text-white">RSS Агрегатор</h1>
           <p class="text-white">Вставьте ссылку - прочитайте RSS</p>
-          <div class="row">
-            <div class="col">
-              <div class="form-floating">
-                <input type="url" autofocus required class="form-control w-100" id="url-link" placeholder="Ссылка RSS" autocomplete="off">
-                <label for="url-input">Ссылка RSS</label>
+          <form action class="rss-form text-body">
+            <div class="row">
+              <div class="col">
+                <div class="form-floating">
+                  <input type="url" autofocus required class="form-control w-100" id="url-input" name="url" placeholder="Ссылка RSS" autocomplete="off">
+                  <label for="url-input">Ссылка RSS</label>
+                </div>
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="h-100 btn btn-lg btn-primary">Добавить</button>
               </div>
             </div>
-            <div class="col-auto">
-              <button type="submit" class="h-100 btn btn-lg btn-primary">Добавить</button>
-            </div>
-          </div>
+          </form>
+          <p class="text-muted">Пример: <i>https://ru.hexlet.io/lessons.rss</i></p>
         </div>
       </section>
     </div>
