@@ -34,6 +34,7 @@
   "homepage": "https://github.com/niyak93rus/frontend-project-lvl3#readme",
   "devDependencies": {
     "@webpack-cli/generators": "^2.4.2",
+    "autoprefixer": "^10.4.4",
     "css-loader": "^6.7.1",
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
