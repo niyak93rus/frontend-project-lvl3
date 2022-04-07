@@ -29,6 +29,52 @@ const config = {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
         type: 'asset',
       },
+      {
+        test: /\.(scss)$/,
+        use: [{
+          // inject CSS to page
+          loader: 'style-loader'
+        }, {
+          // translates CSS into CommonJS modules
+          loader: 'css-loader'
+        }, {
+          // Run postcss actions
+          loader: 'postcss-loader',
+          options: {
+            // `postcssOptions` is needed for postcss 8.x;
+            // if you use postcss 7.x skip the key
+            postcssOptions: {
+              // postcss plugins, can be exported to postcss.config.js
+              plugins: function () {
+                return [
+                  require('autoprefixer')
+                ];
+              }
+            }
+          }
+        }, {
+          // compiles Sass to CSS
+          loader: 'sass-loader'
+        }]
+      },
+      {
+        test: /\.(sass|css|scss)$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: () => [
+                  require("autoprefixer")()
+                ],
+              }
+            },
+          },
+          'sass-loader',
+        ]
+      },
 
       // Add your rules for custom modules here
       // Learn more about loaders from https://webpack.js.org/loaders/
