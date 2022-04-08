@@ -6,7 +6,6 @@ const render = (state) => {
 
   const lastMessage = document.querySelector('.feedback');
   if (lastMessage !== null) {
-    console.log(lastMessage);
     lastMessage.remove();
   }
 
@@ -27,6 +26,31 @@ const render = (state) => {
     column.append(feedback);
     form.reset();
     input.focus();
+  }
+
+  if (state.mode === 'showFeed') {
+    const row = document.querySelector('.container-xxl > .row');
+    row.innerHTML = '';
+
+    const feedList = document.createElement('ul');
+    row.append(feedList);
+
+    state.feeds.forEach((feed) => {
+      const { channelTitle } = feed;
+      const { channelDescription } = feed;
+      const feedCard = document.createElement('div');
+      feedCard.innerHTML = `<li><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
+      feedList.prepend(feedCard);
+      const postList = document.createElement('ul');
+      feedCard.append(postList);
+      feed.posts.forEach((post) => {
+        const { title } = post;
+        const link = post.linkTrimmed;
+        const postCard = document.createElement('div');
+        postCard.innerHTML = `<li><a href="${link}" target="_blank">${title}</a></li>`;
+        postList.prepend(postCard);
+      });
+    });
   }
 };
 
