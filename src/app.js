@@ -1,5 +1,5 @@
 import { object, string } from 'yup';
-import { render, watcher } from './render.js';
+import { watcher } from './render.js';
 
 const state = {
   feeds: [],
@@ -8,38 +8,38 @@ const state = {
 };
 
 const schema = object({
-  url: string().url().required(),
+  url: string().url().required().notOneOf(state.feeds),
 });
 
 const init = () => {
-  watcher(state);
-  const urlForm = document.querySelector('form');
+  const watchedObject = watcher(state);
 
+  const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(urlForm);
 
     const url = data.get('url');
-    console.log(url);
-    schema.isValid(url)
-      .then(() => {
-        if (state.feeds.includes(url)) {
-          state.status = 'invalid';
-          state.error = ('RSS уже существует');
-          render(state);
+    schema.isValid({ url })
+      .then((result) => {
+        if (result) {
+          if (state.feeds.includes(url)) {
+            watchedObject.status = 'invalid';
+            watchedObject.error = ('RSS уже существует');
+          } else {
+            watchedObject.feeds.push(url);
+            watchedObject.status = 'valid';
+          }
         } else {
-          state.feeds.push(url);
-          state.status = 'valid';
-          render(state);
-          console.log(`Feeds: ${state.feeds}`);
+          watchedObject.status = 'invalid';
+          watchedObject.error = 'Ссылка должна быть валидным URL';
         }
       })
       .catch((err) => {
-        state.error = err;
-        state.status = 'invalid';
-        render(state);
+        watchedObject.error = err;
+        watchedObject.status = 'invalid';
       });
   });
 };
 
-export { state, init };
+export default init;

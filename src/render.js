@@ -13,28 +13,28 @@ const render = (state) => {
   const feedback = document.createElement('p');
   feedback.classList.add('m-0', 'position-absolute', 'small', 'feedback');
 
-  const section = document.querySelector('section');
+  const column = document.querySelector('.col-md-10');
   if (state.status === 'invalid') {
-    console.log(state);
     input.classList.add('is-invalid');
     feedback.textContent = state.error;
     feedback.classList.add('text-danger');
-    section.append(feedback);
+    column.append(feedback);
   } else {
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
     feedback.textContent = 'RSS успешно загружен';
     feedback.classList.add('text-success');
-    section.append(feedback);
+    column.append(feedback);
     form.reset();
     input.focus();
   }
 };
 
 const watcher = (state) => {
-  onChange(state, (value, previousValue) => {
-    console.log(`${previousValue} changed to ${value}`);
+  const watchedObject = onChange(state, () => {
+    render(state);
   });
+  return watchedObject;
 };
 
 export { render, watcher };
