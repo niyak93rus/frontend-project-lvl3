@@ -1,4 +1,4 @@
-import { object, string, addMethod } from 'yup';
+import { object, string } from 'yup';
 import { render, watcher } from './render.js';
 
 const state = {
@@ -8,12 +8,12 @@ const state = {
 };
 
 const schema = object({
-  url: string().url().required()
+  url: string().url().required(),
 });
 
 const init = () => {
   watcher(state);
-  const urlForm = document.querySelector('form');  
+  const urlForm = document.querySelector('form');
 
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -34,8 +34,8 @@ const init = () => {
           console.log(`Feeds: ${state.feeds}`);
         }
       })
-      .catch((e) => {
-        state.error = e;
+      .catch((err) => {
+        state.error = err;
         state.status = 'invalid';
         render(state);
       });
