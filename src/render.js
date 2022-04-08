@@ -16,13 +16,13 @@ const render = (state) => {
   const column = document.querySelector('.col-md-10');
   if (state.status === 'invalid') {
     input.classList.add('is-invalid');
-    feedback.textContent = state.error;
+    feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
     column.append(feedback);
   } else {
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
-    feedback.textContent = 'RSS успешно загружен';
+    feedback.textContent = state.feedback;
     feedback.classList.add('text-success');
     column.append(feedback);
     form.reset();

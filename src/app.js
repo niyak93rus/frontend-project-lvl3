@@ -1,9 +1,10 @@
 import { object, string } from 'yup';
+import axios from 'axios';
 import { watcher } from './render.js';
 
 const state = {
   feeds: [],
-  error: null,
+  feedback: null,
   status: 'invalid',
 };
 
@@ -11,7 +12,7 @@ const schema = object({
   url: string().url().required().notOneOf(state.feeds),
 });
 
-const init = () => {
+const app = (i18nInstance) => {
   const watchedObject = watcher(state);
 
   const urlForm = document.querySelector('form');
@@ -25,21 +26,30 @@ const init = () => {
         if (result) {
           if (state.feeds.includes(url)) {
             watchedObject.status = 'invalid';
-            watchedObject.error = ('RSS уже существует');
+            watchedObject.feedback = i18nInstance.t('existsError');
           } else {
             watchedObject.feeds.push(url);
             watchedObject.status = 'valid';
+            watchedObject.feedback = i18nInstance.t('successMessage');
+            axios.get(url)
+              .then((response) => {
+                console.log(response);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
           }
         } else {
           watchedObject.status = 'invalid';
-          watchedObject.error = 'Ссылка должна быть валидным URL';
+          console.log(i18nInstance.t('validError'));
+          watchedObject.feedback = i18nInstance.t('validError');
         }
       })
       .catch((err) => {
-        watchedObject.error = err;
+        watchedObject.feedback = err;
         watchedObject.status = 'invalid';
       });
   });
 };
 
-export default init;
+export default app;
