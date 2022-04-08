@@ -1,4 +1,3 @@
-import { state } from './app.js'
 import onChange from 'on-change';
 
 const render = (state) => {
@@ -33,7 +32,7 @@ const render = (state) => {
 };
 
 const watcher = (state) => {
-  const watchedState = onChange(state, (value, previousValue) => {
+  onChange(state, (value, previousValue) => {
     console.log(`${previousValue} changed to ${value}`);
   });
 };
