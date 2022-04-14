@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import onChange from 'on-change';
 import _ from 'lodash';
 
@@ -62,9 +63,21 @@ const render = (state) => {
   }
 
   if (state.mode === 'updateFeed') {
-    const postList = document.querySelector('.post-list');
-    const sortedByDate = _.sortBy(state.feeds.newPosts, 'postDate');
-    sortedByDate.forEach((post) => {
+    renderFeeds(state);
+    const postLists = document.querySelectorAll('.post-list');
+    postLists.forEach((list) => {
+      list.textContent = '';
+    });
+
+    const allPosts = state.feeds.reduce((all, current) => {
+      all.push(...current.posts);
+      return all;
+    }, []);
+
+    const sortedPosts = _.sortBy(allPosts, 'postDate');
+    sortedPosts.forEach((post) => {
+      const postList = document.querySelector('.post-list');
+      console.log(post);
       const { postTitle } = post;
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');

@@ -3,6 +3,9 @@ import axios from 'axios';
 import _ from 'lodash';
 import { watcher } from './render.js';
 
+let feedCounter = 0;
+let postCounter = 0;
+
 const state = {
   urls: [],
   feeds: [],
@@ -24,6 +27,8 @@ const parseFeed = (feed) => {
   const feedObject = {};
   feedObject.channelTitle = feed.querySelector('channel > title').innerHTML;
   feedObject.channelDescription = feed.querySelector('channel > description').innerHTML;
+  feedObject.id = feedCounter;
+  feedCounter += 1;
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = postItemsArray.map((item) => {
@@ -32,8 +37,11 @@ const parseFeed = (feed) => {
     const link = item.querySelector('link').nextSibling.textContent;
     const linkTrimmed = link.trim().slice(0, -2);
     const postDate = item.querySelector('pubdate').innerHTML;
+    const postId = postCounter;
+    const postToFeed = feedObject.id;
+    postCounter += 1;
     return {
-      postTitle, description, linkTrimmed, postDate,
+      postTitle, description, linkTrimmed, postDate, postId, postToFeed,
     };
   });
   feedObject.posts = posts;
@@ -94,7 +102,13 @@ const app = (i18nInstance) => {
                       }, []);
                       const newPosts = parsedFeed.posts
                         .filter((post) => !allPostDates.includes(post.postDate));
-                      watchedObject.feeds.push(...newPosts);
+                      watchedObject.feeds.forEach((stateFeed) => {
+                        newPosts.forEach((post) => {
+                          if (parsedFeed.channelTitle === stateFeed.channelTitle) {
+                            stateFeed.posts.push(post);
+                          }
+                        });
+                      });
                       watchedObject.mode = 'updateFeed';
                     } else {
                       console.log('no new posts');
