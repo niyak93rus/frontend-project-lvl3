@@ -21,16 +21,19 @@ const parseXML = (data) => {
 
 const parseFeed = (feed) => {
   const feedObject = {};
-  feedObject.channelTitle = feed.querySelector('channel > title').textContent;
-  feedObject.channelDescription = feed.querySelector('channel > description').textContent;
+  feedObject.channelTitle = feed.querySelector('channel > title').innerHTML;
+  feedObject.channelDescription = feed.querySelector('channel > description').innerHTML;
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = postItemsArray.map((item) => {
-    const title = item.querySelector('title').textContent;
-    const description = item.querySelector('description').textContent;
+    const postTitle = item.querySelector('title').innerHTML;
+    const description = item.querySelector('description').innerHTML;
     const link = item.querySelector('link').nextSibling.textContent;
     const linkTrimmed = link.trim().slice(0, -2);
-    return { title, description, linkTrimmed };
+    const postDate = item.querySelector('pubdate').innerHTML;
+    return {
+      postTitle, description, linkTrimmed, postDate,
+    };
   });
   feedObject.posts = posts;
   return feedObject;
@@ -51,22 +54,33 @@ const app = (i18nInstance) => {
           if (state.urls.includes(url)) {
             watchedObject.status = 'invalid';
             watchedObject.feedback = i18nInstance.t('existsError');
-          } else {
-            axios.get((`https://allorigins.hexlet.app/get?disableCache=true&url=${url}`))
-              .then((response) => {
-                const XML = response.request.response;
-                const feed = parseXML(XML);
-                const parsedFeed = parseFeed(feed);
-                watchedObject.urls.push(url);
-                watchedObject.feeds.push(parsedFeed);
-                watchedObject.status = 'valid';
-                watchedObject.feedback = i18nInstance.t('successMessage');
-                watchedObject.mode = 'showFeed';
-              })
-              .catch((error) => {
-                watchedObject.status = 'invalid';
-                watchedObject.feedback = error;
-              });
+          } else { // http://lorem-rss.herokuapp.com/feed?unit=second&interval=5 (5 second interval updating RSS)
+            const makeRequest = (page) => {
+              axios.get((`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(page)}`))
+                .then((response) => {
+                  const XML = response.request.response;
+                  const feed = parseXML(XML);
+                  const parsedFeed = parseFeed(feed);
+                  if (state.urls.includes(url)) {
+                    console.log('old url');
+                    watchedObject.mode = 'updateFeed';
+                  } else {
+                    console.log('new Url');
+                    watchedObject.urls.push(url);
+                    watchedObject.feeds.push(parsedFeed);
+                    watchedObject.status = 'valid';
+                    watchedObject.feedback = i18nInstance.t('successMessage');
+                    watchedObject.mode = 'showFeed';
+                  }
+                })
+                .catch((error) => {
+                  watchedObject.status = 'invalid';
+                  watchedObject.feedback = i18nInstance.t('invalidRSS');
+                  console.log(error);
+                });
+              setTimeout(makeRequest, 5000, url);
+            };
+            makeRequest(url);
           }
         } else {
           watchedObject.status = 'invalid';

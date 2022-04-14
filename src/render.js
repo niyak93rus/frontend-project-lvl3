@@ -42,13 +42,39 @@ const render = (state) => {
       feedCard.innerHTML = `<li><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
       feedList.prepend(feedCard);
       const postList = document.createElement('ul');
+      postList.classList.add('post-list');
       feedCard.append(postList);
       feed.posts.forEach((post) => {
-        const { title } = post;
+        const { postTitle } = post;
         const link = post.linkTrimmed;
         const postCard = document.createElement('div');
-        postCard.innerHTML = `<li><a href="${link}" target="_blank">${title}</a></li>`;
+        postCard.innerHTML = `<li><a href="${link}" target="_blank">${postTitle}</a></li>`;
         postList.prepend(postCard);
+      });
+    });
+  }
+  if (state.mode === 'updateFeed') {
+    console.log('update');
+    state.feeds.forEach((feed) => {
+      const lastPost = feed.posts.sort((a, b) => {
+        if (a.postDate > b.postDate) {
+          return 1;
+        }
+        if (a.postDate < b.postDate) {
+          return -1;
+        }
+        return 0;
+      })[feed.posts.length - 1];
+      console.log(lastPost);
+      feed.posts.forEach((post) => {
+        console.log(post);
+        if (post.postDate > lastPost.postDate) {
+          const { postTitle } = post;
+          const link = post.linkTrimmed;
+          const postCard = document.createElement('div');
+          postCard.innerHTML = `<li><a href="${link}" target="_blank">${postTitle}</a></li>`;
+          document.querySelector('.post-list').prepend(postCard);
+        }
       });
     });
   }
