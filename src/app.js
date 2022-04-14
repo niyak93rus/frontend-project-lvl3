@@ -83,21 +83,18 @@ const app = (i18nInstance) => {
                   const parsedFeed = parseFeed(feed);
                   if (state.urls.includes(url)) {
                     if (checkNewPosts(state, parsedFeed.posts)) {
-                      console.log('new posts');
                       watchedObject.mode = 'waiting';
-                      const statePosts = state.feeds.reduce((all, item) => {
-                        all.push(item.posts);
+                      const allPosts = state.feeds.reduce((all, curr) => {
+                        Object.assign(all, curr.posts);
                         return all;
                       }, []);
-                      const sortedByDate = _.sortBy(statePosts, ['post', 'postDate']);
-                      const lastPost = _.last(...sortedByDate);
+                      const allPostDates = allPosts.reduce((all, curr) => {
+                        all.push(curr.postDate);
+                        return all;
+                      }, []);
                       const newPosts = parsedFeed.posts
-                        .filter((post) => post.postDate > lastPost.postDate);
-                      watchedObject.feeds.forEach((stateFeed) => {
-                        if (stateFeed.channelTitle === parsedFeed.channelTitle) {
-                          stateFeed.posts.push(...newPosts);
-                        }
-                      });
+                        .filter((post) => !allPostDates.includes(post.postDate));
+                      watchedObject.feeds.push(...newPosts);
                       watchedObject.mode = 'updateFeed';
                     } else {
                       console.log('no new posts');
