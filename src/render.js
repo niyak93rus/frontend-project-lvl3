@@ -1,4 +1,17 @@
 import onChange from 'on-change';
+import _ from 'lodash';
+
+const initialRender = () => {
+  const row = document.querySelector('.container-xxl > .row');
+  row.innerHTML = '';
+
+  const feedList = document.createElement('ul');
+  feedList.classList.add('feed-list');
+  row.prepend(feedList);
+
+  const postList = document.createElement('ul');
+  postList.classList.add('post-list');
+};
 
 const render = (state) => {
   const input = document.querySelector('input');
@@ -29,22 +42,21 @@ const render = (state) => {
   }
 
   if (state.mode === 'showFeed') {
+    initialRender();
     const row = document.querySelector('.container-xxl > .row');
-    row.innerHTML = '';
-
-    const feedList = document.createElement('ul');
-    row.append(feedList);
+    const feedList = document.querySelector('.feed-list');
 
     state.feeds.forEach((feed) => {
       const { channelTitle } = feed;
       const { channelDescription } = feed;
       const feedCard = document.createElement('div');
+      feedCard.classList.add('feed-card');
       feedCard.innerHTML = `<li><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
       feedList.prepend(feedCard);
-      const postList = document.createElement('ul');
-      postList.classList.add('post-list');
-      feedCard.append(postList);
-      feed.posts.forEach((post) => {
+      const postList = document.querySelector('.post-list');
+      row.append(postList);
+      const sortedByDate = _.sortBy(feed.posts, 'postDate');
+      sortedByDate.forEach((post) => {
         const { postTitle } = post;
         const link = post.linkTrimmed;
         const postCard = document.createElement('div');
@@ -53,28 +65,20 @@ const render = (state) => {
       });
     });
   }
+
   if (state.mode === 'updateFeed') {
-    console.log('update');
+    console.log('update feed');
+    initialRender();
+    const postList = document.querySelector('.post-list');
+    postList.innerHTML = '';
     state.feeds.forEach((feed) => {
-      const lastPost = feed.posts.sort((a, b) => {
-        if (a.postDate > b.postDate) {
-          return 1;
-        }
-        if (a.postDate < b.postDate) {
-          return -1;
-        }
-        return 0;
-      })[feed.posts.length - 1];
-      console.log(lastPost);
-      feed.posts.forEach((post) => {
-        console.log(post);
-        if (post.postDate > lastPost.postDate) {
-          const { postTitle } = post;
-          const link = post.linkTrimmed;
-          const postCard = document.createElement('div');
-          postCard.innerHTML = `<li><a href="${link}" target="_blank">${postTitle}</a></li>`;
-          document.querySelector('.post-list').prepend(postCard);
-        }
+      const sortedByDate = _.sortBy(feed.posts, 'postDate');
+      sortedByDate.forEach((post) => {
+        const { postTitle } = post;
+        const link = post.linkTrimmed;
+        const postCard = document.createElement('div');
+        postCard.innerHTML = `<li><a href="${link}" target="_blank">${postTitle}</a></li>`;
+        postList.prepend(postCard);
       });
     });
   }

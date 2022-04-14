@@ -1,5 +1,6 @@
 import { object, string } from 'yup';
 import axios from 'axios';
+import _ from 'lodash';
 import { watcher } from './render.js';
 
 const state = {
@@ -39,6 +40,25 @@ const parseFeed = (feed) => {
   return feedObject;
 };
 
+const checkNewPosts = (obj, newPosts) => {
+  const oldPosts = obj.feeds.reduce((all, curr) => {
+    Object.assign(all, curr.posts);
+    return all;
+  }, []);
+  const origPostDates = oldPosts.reduce((all, curr) => {
+    all.push(curr.postDate);
+    return all;
+  }, []);
+  const newPostDates = newPosts.reduce((all, curr) => {
+    all.push(curr.postDate);
+    return all;
+  }, []);
+  if (_.isEqual(origPostDates, newPostDates)) {
+    return false;
+  }
+  return true;
+};
+
 const app = (i18nInstance) => {
   const watchedObject = watcher(state);
 
@@ -62,13 +82,31 @@ const app = (i18nInstance) => {
                   const feed = parseXML(XML);
                   const parsedFeed = parseFeed(feed);
                   if (state.urls.includes(url)) {
-                    console.log('old url');
-                    watchedObject.mode = 'updateFeed';
+                    if (checkNewPosts(state, parsedFeed.posts)) {
+                      console.log('new posts');
+                      watchedObject.mode = 'waiting';
+                      const statePosts = state.feeds.reduce((all, item) => {
+                        all.push(item.posts);
+                        return all;
+                      }, []);
+                      const sortedByDate = _.sortBy(statePosts, ['post', 'postDate']);
+                      const lastPost = _.last(...sortedByDate);
+                      const newPosts = parsedFeed.posts
+                        .filter((post) => post.postDate > lastPost.postDate);
+                      watchedObject.feeds.forEach((stateFeed) => {
+                        if (stateFeed.channelTitle === parsedFeed.channelTitle) {
+                          stateFeed.posts.push(...newPosts);
+                        }
+                      });
+                      watchedObject.mode = 'updateFeed';
+                    } else {
+                      console.log('no new posts');
+                    }
                   } else {
                     console.log('new Url');
                     watchedObject.urls.push(url);
-                    watchedObject.feeds.push(parsedFeed);
                     watchedObject.status = 'valid';
+                    watchedObject.feeds.push(parsedFeed);
                     watchedObject.feedback = i18nInstance.t('successMessage');
                     watchedObject.mode = 'showFeed';
                   }
