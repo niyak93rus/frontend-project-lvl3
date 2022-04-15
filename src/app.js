@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { object, string } from 'yup';
 import axios from 'axios';
-// import _ from 'lodash';
 import { watcher } from './render.js';
 
 const state = {
@@ -112,6 +111,7 @@ const updateFeed = (watchedObject, i18n) => {
 const app = (i18nInstance) => {
   const watchedObject = watcher(state);
   const urlForm = document.querySelector('form');
+  console.log(urlForm);
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(urlForm);
