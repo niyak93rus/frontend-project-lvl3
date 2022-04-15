@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import onChange from 'on-change';
-import _ from 'lodash';
 
 const renderFeeds = (state) => {
   document.querySelector('.feeds').innerHTML = '';
@@ -20,13 +19,12 @@ const renderFeeds = (state) => {
     feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
     feedList.prepend(feedCard);
 
-    const sortedByDate = _.sortBy(feed.posts, 'postDate');
-    sortedByDate.forEach((post) => {
+    feed.posts.forEach((post) => {
       const { postTitle, postId } = post;
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
-      <a href="${link}" target="_blank">${postTitle}</a>
+      <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
       <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
       data-bs-toggle="modal" data-bs-target="#postModal">Посмотреть</button></li>`;
       postList.prepend(postCard);
@@ -78,7 +76,7 @@ const render = (state) => {
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
-      <a href="${link}" target="_blank">${postTitle}</a>
+      <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
       <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
       data-bs-toggle="modal" data-bs-target="#postModal">Посмотреть</button></li>`;
       postList.prepend(postCard);
@@ -88,6 +86,8 @@ const render = (state) => {
   const postModal = document.getElementById('postModal');
   postModal.addEventListener('show.bs.modal', (event) => {
     const button = event.relatedTarget;
+    button.parentElement.children[0].classList.remove('fw-bold');
+    button.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
     const modalTitle = postModal.querySelector('.modal-title');
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');

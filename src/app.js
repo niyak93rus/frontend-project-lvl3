@@ -93,11 +93,11 @@ const updateFeed = (watchedObject, i18n) => {
             if (!getPostIds(watchedObject).includes(post.postId)) {
               if (stateFeed.channelTitle === parsedFeed.channelTitle) {
                 stateFeed.posts.push(post);
+                watchedObject.mode = 'updateFeed';
               }
             }
           });
         });
-        watchedObject.mode = 'updateFeed';
       })
       .catch((error) => {
         watchedObject.mode = 'waiting';
