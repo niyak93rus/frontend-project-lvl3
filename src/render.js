@@ -36,7 +36,6 @@ const render = (state, i18n) => {
     return all;
   }, []);
   const input = document.querySelector('input');
-  const form = document.querySelector('form');
 
   const lastMessage = document.querySelector('.feedback');
   if (lastMessage !== null) {
@@ -58,7 +57,7 @@ const render = (state, i18n) => {
     feedback.textContent = state.feedback;
     feedback.classList.add('text-success');
     column.append(feedback);
-    form.reset();
+    input.value = '';
     input.focus();
   }
 
