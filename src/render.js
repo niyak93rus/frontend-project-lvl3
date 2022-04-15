@@ -3,34 +3,42 @@ import onChange from 'on-change';
 import _ from 'lodash';
 
 const renderFeeds = (state) => {
-  const row = document.querySelector('.container-xxl > .row');
-  row.innerHTML = '';
-
+  document.querySelector('.feeds').innerHTML = '';
+  document.querySelector('.posts').innerHTML = '';
   const feedList = document.createElement('ul');
-  row.prepend(feedList);
+  feedList.classList.add('list-group', 'card', 'border-0');
+  document.querySelector('.feeds').prepend(feedList);
+  const postList = document.createElement('ul');
+  postList.classList.add('post-list', 'list-group', 'card-body', 'border-0');
+  document.querySelector('.posts').append(postList);
 
   state.feeds.forEach((feed) => {
     const { channelTitle } = feed;
     const { channelDescription } = feed;
+
     const feedCard = document.createElement('div');
-    feedCard.classList.add('feed-card');
-    feedCard.innerHTML = `<li><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
+    feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
     feedList.prepend(feedCard);
-    const postList = document.createElement('ul');
-    postList.classList.add('post-list');
-    row.append(postList);
+
     const sortedByDate = _.sortBy(feed.posts, 'postDate');
     sortedByDate.forEach((post) => {
-      const { postTitle } = post;
+      const { postTitle, postId } = post;
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');
-      postCard.innerHTML = `<li><a href="${link}" target="_blank">${postTitle}</a></li>`;
+      postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
+      <a href="${link}" target="_blank">${postTitle}</a>
+      <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
+      data-bs-toggle="modal" data-bs-target="#postModal">Посмотреть</button></li>`;
       postList.prepend(postCard);
     });
   });
 };
 
 const render = (state) => {
+  const allPosts = state.feeds.reduce((all, curr) => {
+    Object.assign(all, curr.posts);
+    return all;
+  }, []);
   const input = document.querySelector('input');
   const form = document.querySelector('form');
 
@@ -63,28 +71,33 @@ const render = (state) => {
   }
 
   if (state.mode === 'updateFeed') {
-    renderFeeds(state);
-    const postLists = document.querySelectorAll('.post-list');
-    postLists.forEach((list) => {
-      list.textContent = '';
-    });
-
-    const allPosts = state.feeds.reduce((all, current) => {
-      all.push(...current.posts);
-      return all;
-    }, []);
-
-    const sortedPosts = _.sortBy(allPosts, 'postDate');
-    sortedPosts.forEach((post) => {
-      const postList = document.querySelector('.post-list');
-      console.log(post);
-      const { postTitle } = post;
+    const postList = document.querySelector('.post-list');
+    postList.innerHTML = '';
+    allPosts.forEach((post) => {
+      const { postTitle, postId } = post;
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');
-      postCard.innerHTML = `<li><a href="${link}" target="_blank">${postTitle}</a></li>`;
+      postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
+      <a href="${link}" target="_blank">${postTitle}</a>
+      <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
+      data-bs-toggle="modal" data-bs-target="#postModal">Посмотреть</button></li>`;
       postList.prepend(postCard);
     });
   }
+
+  const postModal = document.getElementById('postModal');
+  postModal.addEventListener('show.bs.modal', (event) => {
+    const button = event.relatedTarget;
+    const modalTitle = postModal.querySelector('.modal-title');
+    const modalBody = postModal.querySelector('.modal-body');
+    const modalFooter = postModal.querySelector('.modal-footer');
+    const relatedPostId = button.getAttribute('data-bs-postId');
+    const relatedPost = allPosts.filter((post) => post.postId === relatedPostId);
+    modalTitle.textContent = relatedPost[0].postTitle;
+    modalBody.textContent = relatedPost[0].description;
+    modalFooter.innerHTML = `<a href="${relatedPost[0].linkTrimmed}" role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
+  });
 };
 
 const watcher = (state) => {

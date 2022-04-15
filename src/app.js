@@ -1,10 +1,8 @@
+/* eslint-disable no-param-reassign */
 import { object, string } from 'yup';
 import axios from 'axios';
-import _ from 'lodash';
+// import _ from 'lodash';
 import { watcher } from './render.js';
-
-let feedCounter = 0;
-let postCounter = 0;
 
 const state = {
   urls: [],
@@ -12,10 +10,13 @@ const state = {
   feedback: null,
   status: 'invalid',
   mode: null,
+  newPosts: [],
 };
 
+const delay = 5000;
+
 const schema = object({
-  url: string().url().required().notOneOf(state.urls),
+  url: string().url().required().notOneOf(state.urls, 'RSS уже добавлен'),
 });
 
 const parseXML = (data) => {
@@ -27,8 +28,6 @@ const parseFeed = (feed) => {
   const feedObject = {};
   feedObject.channelTitle = feed.querySelector('channel > title').innerHTML;
   feedObject.channelDescription = feed.querySelector('channel > description').innerHTML;
-  feedObject.id = feedCounter;
-  feedCounter += 1;
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = postItemsArray.map((item) => {
@@ -37,103 +36,94 @@ const parseFeed = (feed) => {
     const link = item.querySelector('link').nextSibling.textContent;
     const linkTrimmed = link.trim().slice(0, -2);
     const postDate = item.querySelector('pubdate').innerHTML;
-    const postId = postCounter;
-    const postToFeed = feedObject.id;
-    postCounter += 1;
+    const postId = item.querySelector('guid').textContent;
     return {
-      postTitle, description, linkTrimmed, postDate, postId, postToFeed,
+      postTitle, description, linkTrimmed, postDate, postId,
     };
   });
   feedObject.posts = posts;
   return feedObject;
 };
 
-const checkNewPosts = (obj, newPosts) => {
-  const oldPosts = obj.feeds.reduce((all, curr) => {
+const loadPosts = (userUrl, watchedObject, i18n) => {
+  const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
+  const url = new URL(allOriginsProxy);
+  axios.get(url)
+    .then((response) => {
+      const XML = response.request.response;
+      const feed = parseXML(XML);
+      const parsedFeed = parseFeed(feed);
+      watchedObject.urls.push(userUrl);
+      watchedObject.status = 'valid';
+      watchedObject.feeds.push(parsedFeed);
+      watchedObject.feedback = i18n.t('successMessage');
+      watchedObject.mode = 'showFeed';
+    })
+    .catch((error) => {
+      watchedObject.status = 'invalid';
+      watchedObject.feedback = i18n.t('invalidRSS');
+      console.log(error);
+    });
+};
+
+const getPostIds = (watchedObject) => {
+  const allPosts = watchedObject.feeds.reduce((all, curr) => {
     Object.assign(all, curr.posts);
     return all;
   }, []);
-  const origPostDates = oldPosts.reduce((all, curr) => {
-    all.push(curr.postDate);
+  const allPostIds = allPosts.reduce((all, curr) => {
+    all.push(curr.postId);
     return all;
   }, []);
-  const newPostDates = newPosts.reduce((all, curr) => {
-    all.push(curr.postDate);
-    return all;
-  }, []);
-  if (_.isEqual(origPostDates, newPostDates)) {
-    return false;
-  }
-  return true;
+  return allPostIds;
+};
+
+const updateFeed = (watchedObject, i18n) => {
+  watchedObject.mode = 'waiting';
+  watchedObject.urls.forEach((url) => {
+    const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+    const newUrl = new URL(allOriginsProxy);
+    axios.get(newUrl)
+      .then((response) => {
+        const XML = response.request.response;
+        const feed = parseXML(XML);
+        const parsedFeed = parseFeed(feed);
+        watchedObject.feeds.forEach((stateFeed) => {
+          parsedFeed.posts.forEach((post) => {
+            if (!getPostIds(watchedObject).includes(post.postId)) {
+              if (stateFeed.channelTitle === parsedFeed.channelTitle) {
+                stateFeed.posts.push(post);
+              }
+            }
+          });
+        });
+        watchedObject.mode = 'updateFeed';
+      })
+      .catch((error) => {
+        watchedObject.mode = 'waiting';
+        watchedObject.status = 'invalid';
+        watchedObject.feedback = i18n.t('invalidRSS');
+        console.log(error);
+      });
+  });
+  setTimeout(updateFeed, delay, watchedObject, i18n);
 };
 
 const app = (i18nInstance) => {
   const watchedObject = watcher(state);
-
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(urlForm);
-
     const url = data.get('url');
     schema.isValid({ url })
       .then((result) => {
+        console.log(state.urls);
         if (result) {
-          if (state.urls.includes(url)) {
-            watchedObject.status = 'invalid';
-            watchedObject.feedback = i18nInstance.t('existsError');
-          } else { // http://lorem-rss.herokuapp.com/feed?unit=second&interval=5 (5 second interval updating RSS)
-            const makeRequest = (page) => {
-              axios.get((`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(page)}`))
-                .then((response) => {
-                  const XML = response.request.response;
-                  const feed = parseXML(XML);
-                  const parsedFeed = parseFeed(feed);
-                  if (state.urls.includes(url)) {
-                    if (checkNewPosts(state, parsedFeed.posts)) {
-                      watchedObject.mode = 'waiting';
-                      const allPosts = state.feeds.reduce((all, curr) => {
-                        Object.assign(all, curr.posts);
-                        return all;
-                      }, []);
-                      const allPostDates = allPosts.reduce((all, curr) => {
-                        all.push(curr.postDate);
-                        return all;
-                      }, []);
-                      const newPosts = parsedFeed.posts
-                        .filter((post) => !allPostDates.includes(post.postDate));
-                      watchedObject.feeds.forEach((stateFeed) => {
-                        newPosts.forEach((post) => {
-                          if (parsedFeed.channelTitle === stateFeed.channelTitle) {
-                            stateFeed.posts.push(post);
-                          }
-                        });
-                      });
-                      watchedObject.mode = 'updateFeed';
-                    } else {
-                      console.log('no new posts');
-                    }
-                  } else {
-                    console.log('new Url');
-                    watchedObject.urls.push(url);
-                    watchedObject.status = 'valid';
-                    watchedObject.feeds.push(parsedFeed);
-                    watchedObject.feedback = i18nInstance.t('successMessage');
-                    watchedObject.mode = 'showFeed';
-                  }
-                })
-                .catch((error) => {
-                  watchedObject.status = 'invalid';
-                  watchedObject.feedback = i18nInstance.t('invalidRSS');
-                  console.log(error);
-                });
-              setTimeout(makeRequest, 5000, url);
-            };
-            makeRequest(url);
-          }
+          loadPosts(url, watchedObject, i18nInstance);
         } else {
+          watchedObject.mode = 'waiting';
           watchedObject.status = 'invalid';
-          console.log(i18nInstance.t('validError'));
           watchedObject.feedback = i18nInstance.t('validError');
         }
       })
@@ -141,6 +131,7 @@ const app = (i18nInstance) => {
         watchedObject.feedback = err;
         watchedObject.status = 'invalid';
       });
+    updateFeed(watchedObject, i18nInstance);
   });
 };
 

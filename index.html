@@ -8,6 +8,18 @@
   <title>RSS-agregator</title>
 </head>
 <body>
+  <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer"></div>
+      </div>
+    </div>
+  </div>
   <main>
       <section class="container-fluid bg-dark p-5">
         <div class="col-md-10 col-lg-8 mx-auto text-white">
@@ -32,10 +44,8 @@
       </section>
       <section class="container-fluid container-xxl p-5">
         <div class="row">
-          <div class="col-md-10 col-lg-8 order-1 mx-auto posts">
-          </div>
-          <div class="col-md-10 col-lg-4 mx-auto order-0 order-lg-1 feeds">
-          </div>
+          <div class="col-md-10 col-lg-8 order-1 mx-auto posts"></div>
+          <div class="col-md-10 col-lg-4 mx-auto order-0 order-lg-1 feeds"></div>
         </div>
       </section>
     </div>
