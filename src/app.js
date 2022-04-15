@@ -1,22 +1,7 @@
 /* eslint-disable no-param-reassign */
-import { object, string } from 'yup';
 import axios from 'axios';
-import { watcher } from './render.js';
-
-const state = {
-  urls: [],
-  feeds: [],
-  feedback: null,
-  status: 'invalid',
-  mode: null,
-  newPosts: [],
-};
 
 const delay = 5000;
-
-const schema = object({
-  url: string().url().required().notOneOf(state.urls, 'RSS уже добавлен'),
-});
 
 const parseXML = (data) => {
   const parser = new DOMParser();
@@ -108,8 +93,7 @@ const updateFeed = (watchedObject, i18n) => {
   setTimeout(updateFeed, delay, watchedObject, i18n);
 };
 
-const app = (i18nInstance) => {
-  const watchedObject = watcher(state);
+const app = (state, schema, i18nInstance, watchedObject) => {
   const urlForm = document.querySelector('form');
   console.log(urlForm);
   urlForm.addEventListener('submit', (e) => {

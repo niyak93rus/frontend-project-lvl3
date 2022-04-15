@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
-import onChange from 'on-change';
-
-const renderFeeds = (state) => {
+const renderFeeds = (state, i18n) => {
   document.querySelector('.feeds').innerHTML = '';
   document.querySelector('.posts').innerHTML = '';
   const feedList = document.createElement('ul');
@@ -26,13 +24,13 @@ const renderFeeds = (state) => {
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
       <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
       <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
-      data-bs-toggle="modal" data-bs-target="#postModal">Посмотреть</button></li>`;
+      data-bs-toggle="modal" data-bs-target="#postModal">${i18n.t('buttonTextShow')}</button></li>`;
       postList.prepend(postCard);
     });
   });
 };
 
-const render = (state) => {
+const render = (state, i18n) => {
   const allPosts = state.feeds.reduce((all, curr) => {
     Object.assign(all, curr.posts);
     return all;
@@ -78,7 +76,7 @@ const render = (state) => {
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
       <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
       <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
-      data-bs-toggle="modal" data-bs-target="#postModal">Просмотр</button></li>`;
+      data-bs-toggle="modal" data-bs-target="#postModal">${i18n.t('buttonTextShow')}</button></li>`;
       postList.prepend(postCard);
     });
   }
@@ -100,11 +98,4 @@ const render = (state) => {
   });
 };
 
-const watcher = (state) => {
-  const watchedObject = onChange(state, () => {
-    render(state);
-  });
-  return watchedObject;
-};
-
-export { render, watcher };
+export default render;
