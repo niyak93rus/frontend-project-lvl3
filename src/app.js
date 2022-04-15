@@ -95,11 +95,11 @@ const updateFeed = (watchedObject, i18n) => {
 
 const app = (_state, schema, i18nInstance, watchedObject) => {
   const urlForm = document.querySelector('form');
-  console.log(urlForm);
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
+    console.log(url);
     schema.isValid({ url })
       .then((result) => {
         if (result) {
