@@ -63,7 +63,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'showFeed') {
-    renderFeeds(state);
+    renderFeeds(state, i18n);
   }
 
   if (state.mode === 'updateFeed') {
