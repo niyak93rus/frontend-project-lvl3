@@ -93,7 +93,7 @@ const updateFeed = (watchedObject, i18n) => {
   setTimeout(updateFeed, delay, watchedObject, i18n);
 };
 
-const app = (state, schema, i18nInstance, watchedObject) => {
+const app = (_state, schema, i18nInstance, watchedObject) => {
   const urlForm = document.querySelector('form');
   console.log(urlForm);
   urlForm.addEventListener('submit', (e) => {
@@ -102,10 +102,10 @@ const app = (state, schema, i18nInstance, watchedObject) => {
     const url = data.get('url');
     schema.isValid({ url })
       .then((result) => {
-        console.log(state.urls);
         if (result) {
           loadPosts(url, watchedObject, i18nInstance);
         } else {
+          console.log(url);
           watchedObject.mode = 'waiting';
           watchedObject.status = 'invalid';
           watchedObject.feedback = i18nInstance.t('validError');
@@ -114,6 +114,7 @@ const app = (state, schema, i18nInstance, watchedObject) => {
       .catch((err) => {
         watchedObject.feedback = err;
         watchedObject.status = 'invalid';
+        console.log(err, url);
       });
     updateFeed(watchedObject, i18nInstance);
   });
