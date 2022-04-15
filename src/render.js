@@ -78,7 +78,7 @@ const render = (state) => {
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
       <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
       <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
-      data-bs-toggle="modal" data-bs-target="#postModal">Посмотреть</button></li>`;
+      data-bs-toggle="modal" data-bs-target="#postModal">Просмотр</button></li>`;
       postList.prepend(postCard);
     });
   }
