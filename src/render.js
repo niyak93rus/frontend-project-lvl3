@@ -101,7 +101,7 @@ const render = (state, i18n) => {
     });
   }
 
-  if (state.mode === 'filling') {
+  if (state.mode === 'filling' || state.mode === 'showFeed' || state.mode === 'updateFeed') {
     const buttons = document.getElementsByName('button');
     const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
