@@ -41,8 +41,8 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
     const url = new URL(allOriginsProxy);
     axios.get(url)
+      .then(() => blockWhileLoading(watchedObject))
       .then((response) => {
-        setTimeout(blockWhileLoading(watchedObject), 1000);
         const XML = response.request.response;
         const feed = parseXML(XML);
         const parsedFeed = parseFeed(feed);
@@ -84,6 +84,7 @@ const updateFeed = (watchedObject, i18n) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
     const newUrl = new URL(allOriginsProxy);
     axios.get(newUrl)
+      .then(() => blockWhileLoading(watchedObject))
       .then((response) => {
         const XML = response.request.response;
         const feed = parseXML(XML);
