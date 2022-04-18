@@ -50,11 +50,14 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
         watchedObject.mode = 'showFeed';
       })
       .catch((error) => {
-        watchedObject.status = 'invalid';
-        watchedObject.feedback = i18n.t('networkError');
-        // watchedObject.status = 'invalid';
-        // watchedObject.feedback = i18n.t('invalidRSS');
         console.log(error);
+        if (error.name === 'Network Error') {
+          watchedObject.status = 'invalid';
+          watchedObject.feedback = i18n.t('networkError');
+        } else {
+          watchedObject.status = 'invalid';
+          watchedObject.feedback = i18n.t('invalidRSS');
+        }
       });
   }
 };
