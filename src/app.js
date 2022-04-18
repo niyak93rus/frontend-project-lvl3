@@ -48,6 +48,10 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
         watchedObject.mode = 'showFeed';
       })
       .catch((error) => {
+        if (error.Error === 'Network Error') {
+          watchedObject.status = 'invalid';
+          watchedObject.feedback = i18n.t('networkError');
+        }
         watchedObject.status = 'invalid';
         watchedObject.feedback = i18n.t('invalidRSS');
         console.log(error);
