@@ -91,6 +91,8 @@ const render = (state, i18n) => {
     buttons.forEach((button) => {
       button.disabled = true;
       blockButton(button, i18n);
+      feedback.textContent = i18n.t('networkError');
+      feedback.classList.add('text-danger');
     });
   }
 
