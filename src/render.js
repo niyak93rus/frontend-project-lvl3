@@ -37,6 +37,8 @@ const blockButton = (button, i18n) => {
 };
 
 const render = (state, i18n) => {
+  console.log(state.mode);
+
   const allPosts = state.feeds.reduce((all, curr) => {
     Object.assign(all, curr.posts);
     return all;
@@ -88,6 +90,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'processing') {
+    console.log('processing');
     const buttons = document.getElementsByName('button');
     const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
