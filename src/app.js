@@ -42,6 +42,7 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
         const XML = response.request.response;
         const feed = parseXML(XML);
         const parsedFeed = parseFeed(feed);
+        watchedObject.mode = 'waiting';
         watchedObject.urls.push(userUrl);
         watchedObject.status = 'valid';
         watchedObject.feeds.push(parsedFeed);

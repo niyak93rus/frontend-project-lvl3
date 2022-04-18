@@ -96,16 +96,16 @@ const render = (state, i18n) => {
     buttons.forEach((button) => {
       button.disabled = true;
       blockButton(button, i18n);
-      feedback.textContent = state.feedback;
-      feedback.classList.add('text-danger');
     });
+    feedback.textContent = state.feedback;
+    feedback.classList.add('text-danger');
   }
 
-  if (state.mode === 'filling' || state.mode === 'showFeed' || state.mode === 'updateFeed') {
+  if (state.mode === 'filling' || state.mode === 'showFeed' || state.mode === 'updateFeed' || state.mode === 'waiting') {
     const buttons = document.getElementsByName('button');
     const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
-      item.setAttribute('readonly', false);
+      item.removeAttribute('readonly');
     });
     buttons.forEach((button) => {
       button.disabled = false;
