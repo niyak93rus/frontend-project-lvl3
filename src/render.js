@@ -102,6 +102,7 @@ const render = (state, i18n) => {
     });
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
+    console.log(document.querySelector('#input-url').getAttribute('readonly'));
   }
 
   if (state.mode === 'filling' || state.mode === 'showFeed' || state.mode === 'updateFeed' || state.mode === 'waiting') {
