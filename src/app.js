@@ -38,6 +38,7 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     const url = new URL(allOriginsProxy);
     axios.get(url)
       .then((response) => {
+        watchedObject.mode = 'processing';
         const XML = response.request.response;
         const feed = parseXML(XML);
         const parsedFeed = parseFeed(feed);
@@ -48,7 +49,7 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
         watchedObject.mode = 'showFeed';
       })
       .catch((error) => {
-        if (error.Error === 'Network Error') {
+        if (error === 'Error: Network Error') {
           watchedObject.status = 'invalid';
           watchedObject.feedback = i18n.t('networkError');
         }
@@ -103,6 +104,7 @@ const updateFeed = (watchedObject, i18n) => {
 };
 
 const app = (_state, schema, i18nInstance, watchedObject) => {
+  watchedObject.mode = 'filling';
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();

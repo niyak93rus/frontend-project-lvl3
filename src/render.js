@@ -80,6 +80,20 @@ const render = (state, i18n) => {
     });
   }
 
+  if (state.mode === 'processing') {
+    const buttons = document.getElementsByName('button');
+    buttons.forEach((button) => {
+      button.disabled = true;
+    });
+  }
+
+  if (state.mode === 'filling') {
+    const buttons = document.getElementsByName('button');
+    buttons.forEach((button) => {
+      button.disabled = false;
+    });
+  }
+
   const postModal = document.getElementById('postModal');
   postModal.addEventListener('show.bs.modal', (event) => {
     const button = event.relatedTarget;
