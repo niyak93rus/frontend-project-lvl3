@@ -38,7 +38,6 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     const url = new URL(allOriginsProxy);
     axios.get(url)
       .then((response) => {
-        console.log(response);
         watchedObject.mode = 'processing';
         const XML = response.request.response;
         const feed = parseXML(XML);
@@ -125,7 +124,7 @@ const app = (_state, schema, i18nInstance, watchedObject) => {
       .catch((err) => {
         watchedObject.feedback = err;
         watchedObject.status = 'invalid';
-        console.log(err, url);
+        console.log(err);
       });
     updateFeed(watchedObject, i18nInstance);
   });

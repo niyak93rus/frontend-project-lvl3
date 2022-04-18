@@ -91,7 +91,7 @@ const render = (state, i18n) => {
     const buttons = document.getElementsByName('button');
     const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
-      item.readonly = true;
+      item.setAttribute('readonly', true);
     });
     buttons.forEach((button) => {
       button.disabled = true;
@@ -103,9 +103,9 @@ const render = (state, i18n) => {
 
   if (state.mode === 'filling') {
     const buttons = document.getElementsByName('button');
-    const inputs = document.getElementsByName('input');
+    const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
-      item.readonly = false;
+      item.setAttribute('readonly', false);
     });
     buttons.forEach((button) => {
       button.disabled = false;
