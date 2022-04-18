@@ -30,40 +30,33 @@ const parseFeed = (feed) => {
 };
 
 const blockWhileLoading = (watchedObject) => {
-  console.log('loading');
   watchedObject.mode = 'processing';
 };
 
 const loadPosts = (userUrl, watchedObject, i18n) => {
-  if (watchedObject.urls.includes(userUrl)) {
-    watchedObject.status = 'invalid';
-    watchedObject.feedback = i18n.t('existsError');
-  } else {
-    const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
-    const url = new URL(allOriginsProxy);
-    axios.get(url)
-      .then((response) => {
-        const XML = response.request.response;
-        const feed = parseXML(XML);
-        const parsedFeed = parseFeed(feed);
-        watchedObject.mode = 'waiting';
-        watchedObject.urls.push(userUrl);
-        watchedObject.status = 'valid';
-        watchedObject.feeds.push(parsedFeed);
-        watchedObject.feedback = i18n.t('successMessage');
-        watchedObject.mode = 'showFeed';
-      })
-      .catch((error) => {
-        console.log(error);
-        if (error.message === 'Network Error') {
-          watchedObject.status = 'invalid';
-          watchedObject.feedback = i18n.t('networkError');
-        } else {
-          watchedObject.status = 'invalid';
-          watchedObject.feedback = i18n.t('invalidRSS');
-        }
-      });
-  }
+  const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
+  const url = new URL(allOriginsProxy);
+  axios.get(url)
+    .then((response) => {
+      const XML = response.request.response;
+      const feed = parseXML(XML);
+      const parsedFeed = parseFeed(feed);
+      watchedObject.urls.push(userUrl);
+      watchedObject.status = 'valid';
+      watchedObject.feeds.push(parsedFeed);
+      watchedObject.feedback = i18n.t('successMessage');
+      watchedObject.mode = 'showFeed';
+    })
+    .catch((error) => {
+      console.log(error);
+      if (error.message === 'Network Error') {
+        watchedObject.status = 'invalid';
+        watchedObject.feedback = i18n.t('networkError');
+      } else {
+        watchedObject.status = 'invalid';
+        watchedObject.feedback = i18n.t('invalidRSS');
+      }
+    });
 };
 
 const getPostIds = (watchedObject) => {
@@ -114,15 +107,20 @@ const app = (_state, schema, i18nInstance, watchedObject) => {
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    blockWhileLoading(watchedObject);
     const data = new FormData(urlForm);
     const url = data.get('url');
+    blockWhileLoading(watchedObject);
     schema.isValid({ url })
       .then((result) => {
         if (result) {
-          loadPosts(url, watchedObject, i18nInstance);
-        } else {
-          watchedObject.mode = 'waiting';
+          if (watchedObject.urls.includes(url)) {
+            watchedObject.status = 'invalid';
+            watchedObject.feedback = i18nInstance.t('existsError');
+          } else {
+            loadPosts(url, watchedObject, i18nInstance);
+          }
+        }
+        if (!result) {
           watchedObject.status = 'invalid';
           watchedObject.feedback = i18nInstance.t('validError');
         }

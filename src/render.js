@@ -59,13 +59,13 @@ const render = (state, i18n) => {
     column.append(feedback);
   }
   if (state.status === 'valid') {
+    input.value = '';
+    input.focus();
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
     feedback.textContent = state.feedback;
     feedback.classList.add('text-success');
     column.append(feedback);
-    input.value = '';
-    input.focus();
   }
 
   if (state.mode === 'showFeed') {
