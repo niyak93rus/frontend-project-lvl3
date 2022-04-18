@@ -29,6 +29,10 @@ const parseFeed = (feed) => {
   return feedObject;
 };
 
+const blockWhileLoading = (watchedObject) => {
+  watchedObject.mode = 'processing';
+};
+
 const loadPosts = (userUrl, watchedObject, i18n) => {
   if (watchedObject.urls.includes(userUrl)) {
     watchedObject.status = 'invalid';
@@ -38,7 +42,7 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     const url = new URL(allOriginsProxy);
     axios.get(url)
       .then((response) => {
-        watchedObject.mode = 'processing';
+        setTimeout(blockWhileLoading(watchedObject), 1000);
         const XML = response.request.response;
         const feed = parseXML(XML);
         const parsedFeed = parseFeed(feed);
