@@ -51,7 +51,7 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
       })
       .catch((error) => {
         console.log(error);
-        if (error.name === 'Network Error') {
+        if (error.message === 'Network Error') {
           watchedObject.status = 'invalid';
           watchedObject.feedback = i18n.t('networkError');
         } else {
