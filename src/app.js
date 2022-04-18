@@ -30,24 +30,29 @@ const parseFeed = (feed) => {
 };
 
 const loadPosts = (userUrl, watchedObject, i18n) => {
-  const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
-  const url = new URL(allOriginsProxy);
-  axios.get(url)
-    .then((response) => {
-      const XML = response.request.response;
-      const feed = parseXML(XML);
-      const parsedFeed = parseFeed(feed);
-      watchedObject.urls.push(userUrl);
-      watchedObject.status = 'valid';
-      watchedObject.feeds.push(parsedFeed);
-      watchedObject.feedback = i18n.t('successMessage');
-      watchedObject.mode = 'showFeed';
-    })
-    .catch((error) => {
-      watchedObject.status = 'invalid';
-      watchedObject.feedback = i18n.t('invalidRSS');
-      console.log(error);
-    });
+  if (watchedObject.urls.includes(userUrl)) {
+    watchedObject.status = 'invalid';
+    watchedObject.feedback = i18n.t('existsError');
+  } else {
+    const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
+    const url = new URL(allOriginsProxy);
+    axios.get(url)
+      .then((response) => {
+        const XML = response.request.response;
+        const feed = parseXML(XML);
+        const parsedFeed = parseFeed(feed);
+        watchedObject.urls.push(userUrl);
+        watchedObject.status = 'valid';
+        watchedObject.feeds.push(parsedFeed);
+        watchedObject.feedback = i18n.t('successMessage');
+        watchedObject.mode = 'showFeed';
+      })
+      .catch((error) => {
+        watchedObject.status = 'invalid';
+        watchedObject.feedback = i18n.t('invalidRSS');
+        console.log(error);
+      });
+  }
 };
 
 const getPostIds = (watchedObject) => {
