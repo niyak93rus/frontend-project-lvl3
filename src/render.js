@@ -89,16 +89,24 @@ const render = (state, i18n) => {
 
   if (state.mode === 'processing') {
     const buttons = document.getElementsByName('button');
+    const inputs = document.getElementsByName('input');
+    inputs.forEach((item) => {
+      item.readonly = true;
+    });
     buttons.forEach((button) => {
       button.disabled = true;
       blockButton(button, i18n);
-      feedback.textContent = i18n.t('networkError');
+      feedback.textContent = state.feedback;
       feedback.classList.add('text-danger');
     });
   }
 
   if (state.mode === 'filling') {
     const buttons = document.getElementsByName('button');
+    const inputs = document.getElementsByName('input');
+    inputs.forEach((item) => {
+      item.readonly = false;
+    });
     buttons.forEach((button) => {
       button.disabled = false;
     });
