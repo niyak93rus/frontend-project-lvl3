@@ -99,13 +99,11 @@ const app = (_state, schema, i18nInstance, watchedObject) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
-    console.log(url);
     schema.isValid({ url })
       .then((result) => {
         if (result) {
           loadPosts(url, watchedObject, i18nInstance);
         } else {
-          console.log(url);
           watchedObject.mode = 'waiting';
           watchedObject.status = 'invalid';
           watchedObject.feedback = i18nInstance.t('validError');

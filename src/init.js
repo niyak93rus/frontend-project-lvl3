@@ -25,12 +25,12 @@ export default () => {
   })
     .then();
 
-  const schema = object({
-    url: string().url().required(i18nInstance.t('emptyError')).notOneOf(state.urls, i18nInstance.t('existsError')),
-  });
-
   const watchedObject = onChange(state, () => {
     render(state, i18nInstance);
+  });
+
+  const schema = object({
+    url: string().url().required(i18nInstance.t('emptyError')).notOneOf(watchedObject.urls, i18nInstance.t('existsError')),
   });
 
   runApp(state, schema, i18nInstance, watchedObject);
