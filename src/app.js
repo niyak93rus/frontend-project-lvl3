@@ -30,6 +30,7 @@ const parseFeed = (feed) => {
 };
 
 const blockWhileLoading = (watchedObject) => {
+  console.log('loading');
   watchedObject.mode = 'processing';
 };
 
@@ -41,7 +42,6 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
     const url = new URL(allOriginsProxy);
     axios.get(url)
-      .then(() => blockWhileLoading(watchedObject))
       .then((response) => {
         const XML = response.request.response;
         const feed = parseXML(XML);
@@ -84,7 +84,6 @@ const updateFeed = (watchedObject, i18n) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
     const newUrl = new URL(allOriginsProxy);
     axios.get(newUrl)
-      .then(() => blockWhileLoading(watchedObject))
       .then((response) => {
         const XML = response.request.response;
         const feed = parseXML(XML);
@@ -115,6 +114,7 @@ const app = (_state, schema, i18nInstance, watchedObject) => {
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    blockWhileLoading(watchedObject);
     const data = new FormData(urlForm);
     const url = data.get('url');
     schema.isValid({ url })
