@@ -11,7 +11,7 @@ export default () => {
     urls: [],
     feeds: [],
     feedback: null,
-    status: 'invalid',
+    status: null,
     mode: null,
     newPosts: [],
   };

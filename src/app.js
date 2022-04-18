@@ -38,6 +38,7 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     const url = new URL(allOriginsProxy);
     axios.get(url)
       .then((response) => {
+        console.log(response);
         watchedObject.mode = 'processing';
         const XML = response.request.response;
         const feed = parseXML(XML);

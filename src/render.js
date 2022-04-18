@@ -57,7 +57,8 @@ const render = (state, i18n) => {
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
     column.append(feedback);
-  } else {
+  }
+  if (state.status === 'valid') {
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
     feedback.textContent = state.feedback;
