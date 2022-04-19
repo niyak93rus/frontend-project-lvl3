@@ -104,11 +104,11 @@ const app = (schema, i18nInstance, watchedState) => {
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    watchedState.mode = 'processing';
     const data = new FormData(urlForm);
     const url = data.get('url');
     schema.isValid({ url })
       .then((result) => {
-        watchedState.mode = 'processing';
         if (result) {
           if (watchedState.urls.includes(url)) {
             watchedState.status = 'invalid';
