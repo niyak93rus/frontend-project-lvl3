@@ -106,9 +106,9 @@ const app = (schema, i18nInstance, watchedState) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
-    watchedState.mode = 'processing';
     schema.isValid({ url })
       .then((result) => {
+        watchedState.mode = 'processing';
         if (result) {
           if (watchedState.urls.includes(url)) {
             watchedState.status = 'invalid';
