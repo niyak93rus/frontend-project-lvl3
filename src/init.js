@@ -23,7 +23,8 @@ export default () => {
       ru,
     },
   })
-    .then();
+    .then()
+    .catch((err) => console.log(err));
 
   const watchedState = onChange(state, () => {
     render(state, i18nInstance);
