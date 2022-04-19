@@ -34,6 +34,10 @@ const loadPosts = (userUrl, watchedState, i18n) => {
   const url = new URL(allOriginsProxy);
   axios.get(url)
     .then((response) => {
+      watchedState.mode = 'processing';
+      return response;
+    })
+    .then((response) => {
       const XML = response.request.response;
       const feed = parseXML(XML);
       const parsedFeed = parseFeed(feed);
@@ -105,7 +109,6 @@ const app = (schema, i18nInstance, watchedState) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
-    watchedState.mode = 'processing';
     schema.validate({ url })
       .then(() => {
         watchedState.urls.push(url);
