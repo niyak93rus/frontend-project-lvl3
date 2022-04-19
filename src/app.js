@@ -29,13 +29,10 @@ const parseFeed = (feed) => {
   return feedObject;
 };
 
-const blockWhileLoading = (watchedObject) => {
-  watchedObject.mode = 'processing';
-};
-
 const loadPosts = (userUrl, watchedObject, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
   const url = new URL(allOriginsProxy);
+  watchedObject.mode = 'processing';
   axios.get(url)
     .then((response) => {
       const XML = response.request.response;
@@ -92,10 +89,10 @@ const updateFeed = (watchedObject, i18n) => {
         });
       })
       .catch((error) => {
+        watchedObject.mode = 'filling';
         watchedObject.status = 'invalid';
         watchedObject.feedback = i18n.t('invalidRSS');
         console.log(error);
-        watchedObject.mode = 'filling';
       });
   });
   setTimeout(updateFeed, delay, watchedObject, i18n);
@@ -108,7 +105,6 @@ const app = (_state, schema, i18nInstance, watchedObject) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
-    blockWhileLoading(watchedObject);
     schema.isValid({ url })
       .then((result) => {
         if (result) {
