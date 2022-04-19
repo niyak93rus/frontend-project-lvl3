@@ -25,7 +25,7 @@ export default () => {
   })
     .then();
 
-  const watchedObject = onChange(state, () => {
+  const watchedState = onChange(state, () => {
     render(state, i18nInstance);
   });
 
@@ -33,5 +33,5 @@ export default () => {
     url: string().url().required(i18nInstance.t('emptyError')).notOneOf(state.urls, i18nInstance.t('existsError')),
   });
 
-  runApp(state, schema, i18nInstance, watchedObject);
+  runApp(schema, i18nInstance, watchedState);
 };
