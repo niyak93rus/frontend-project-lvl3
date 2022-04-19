@@ -82,21 +82,19 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'processing') {
-    const buttons = document.getElementsByName('add');
     input.readOnly = true;
-    buttons.forEach((button) => {
-      button.disabled = true;
-    });
+    const button = document.querySelector('[aria-label="add"]');
+    button.setAttribute('disabled', 'disabled');
+    console.log(button);
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
   }
 
   if (state.mode !== 'processing') {
-    const buttons = document.getElementsByName('add');
     input.readOnly = false;
-    buttons.forEach((button) => {
-      button.disabled = false;
-    });
+    const button = document.querySelector('[aria-label="add"]');
+    button.removeAttribute('disabled');
+    console.log(button);
   }
 
   const postModal = document.getElementById('postModal');
