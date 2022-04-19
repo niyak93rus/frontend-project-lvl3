@@ -4,9 +4,6 @@
   "description": "Frontend project 3",
   "main": "src/index.js",
   "type": "module",
-  "bin": {
-    "index": "src/index.js"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode=production --node-env=production",
