@@ -9,7 +9,7 @@ const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
-  entry: './src/run.js',
+  entry: './src/init.js',
   output: {
     path: path.resolve(__dirname, 'public'),
   },

@@ -12,7 +12,6 @@ export default () => {
     feedback: null,
     status: null,
     mode: null,
-    newPosts: [],
   };
 
   const i18nInstance = i18next.createInstance();
@@ -27,8 +26,10 @@ export default () => {
     .then()
     .catch((err) => console.log(err));
 
-  const watchedState = onChange(state, () => {
-    render(state, i18nInstance);
+  const watchedState = onChange(state, (path) => {
+    if (path === 'mode' || path === 'status' || path === 'feedback') {
+      render(state, i18nInstance);
+    }
   });
 
   const schema = object({

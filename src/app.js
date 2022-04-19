@@ -52,9 +52,11 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       if (error.message === 'Network Error') {
         watchedState.status = 'invalid';
         watchedState.feedback = i18n.t('networkError');
+        watchedState.mode = 'filling';
       } else {
         watchedState.status = 'invalid';
         watchedState.feedback = i18n.t('invalidRSS');
+        watchedState.mode = 'filling';
       }
     });
 };
@@ -92,7 +94,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
 //         });
 //       })
 //       .catch((error) => {
-//         watchedState.mode = 'waiting';
+//         watchedState.mode = 'filling';
 //         watchedState.status = 'invalid';
 //         watchedState.feedback = i18n.t('invalidRSS');
 //         console.log(error);
@@ -115,6 +117,7 @@ const app = (schema, i18nInstance, watchedState) => {
           if (watchedState.urls.includes(url)) {
             watchedState.status = 'invalid';
             watchedState.feedback = i18nInstance.t('existsError');
+            watchedState.mode = 'filling';
           } else {
             loadPosts(url, watchedState, i18nInstance);
           }
@@ -122,6 +125,7 @@ const app = (schema, i18nInstance, watchedState) => {
         if (!result) {
           watchedState.status = 'invalid';
           watchedState.feedback = i18nInstance.t('validError');
+          watchedState.mode = 'filling';
         }
       })
       .catch((err) => {
