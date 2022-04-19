@@ -29,15 +29,12 @@ const parseFeed = (feed) => {
   return feedObject;
 };
 
-const blockWhileLoading = (watchedState) => {
-  watchedState.mode = 'processing';
-};
-
 const loadPosts = (userUrl, watchedState, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
   const url = new URL(allOriginsProxy);
   axios.get(url)
     .then((response) => {
+      watchedState.mode = 'processing';
       const XML = response.request.response;
       const feed = parseXML(XML);
       const parsedFeed = parseFeed(feed);
@@ -49,6 +46,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
     })
     .catch((error) => {
       console.log(error);
+      watchedState.mode = 'processing';
       if (error.message === 'Network Error') {
         watchedState.status = 'invalid';
         watchedState.feedback = i18n.t('networkError');
@@ -110,7 +108,6 @@ const app = (schema, i18nInstance, watchedState) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
-    blockWhileLoading(watchedState);
     schema.isValid({ url })
       .then((result) => {
         if (result) {
