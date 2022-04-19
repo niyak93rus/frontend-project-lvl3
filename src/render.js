@@ -83,8 +83,7 @@ const render = (state, i18n) => {
 
   if (state.mode === 'processing') {
     const buttons = document.getElementsByName('button');
-    input.setAttribute('readonly', true);
-    console.log(input.getAttribute('readonly'));
+    input.readOnly = true;
     buttons.forEach((button) => {
       button.disabled = true;
     });
@@ -94,8 +93,7 @@ const render = (state, i18n) => {
 
   if (state.mode !== 'processing') {
     const buttons = document.getElementsByName('button');
-    input.removeAttribute('readonly');
-    console.log(input.getAttribute('readonly'));
+    input.readOnly = false;
     buttons.forEach((button) => {
       button.disabled = false;
     });
