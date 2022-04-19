@@ -101,7 +101,7 @@ const render = (state, i18n) => {
     feedback.classList.add('text-danger');
   }
 
-  if (state.mode === 'filling' || state.mode === 'showFeed' || state.mode === 'updateFeed') {
+  if (state.mode !== 'processing') {
     const buttons = document.getElementsByName('button');
     const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
