@@ -32,12 +32,10 @@ const parseFeed = (feed) => {
 const loadPosts = (userUrl, watchedState, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
   const url = new URL(allOriginsProxy);
+  watchedState.mode = 'processing';
   axios.get(url)
     .then((response) => {
-      watchedState.mode = 'processing';
-      return response;
-    })
-    .then((response) => {
+      console.log(watchedState.mode);
       const XML = response.request.response;
       const feed = parseXML(XML);
       const parsedFeed = parseFeed(feed);

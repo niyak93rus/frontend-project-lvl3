@@ -35,7 +35,9 @@ const render = (state, i18n) => {
     Object.assign(all, curr.posts);
     return all;
   }, []);
+
   const input = document.querySelector('input');
+  const button = document.querySelector('[aria-label="add"]');
 
   const lastMessage = document.querySelector('.feedback');
   if (lastMessage !== null) {
@@ -63,10 +65,14 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'showFeed') {
+    button.disabled = false;
+    input.readOnly = false;
     renderFeeds(state, i18n);
   }
 
   if (state.mode === 'updateFeed') {
+    button.disabled = false;
+    input.readOnly = false;
     const postList = document.querySelector('.post-list');
     postList.innerHTML = '';
     allPosts.forEach((post) => {
@@ -81,26 +87,23 @@ const render = (state, i18n) => {
     });
   }
 
+  if (state.mode === 'filling') {
+    button.disabled = false;
+    input.readOnly = false;
+  }
+
   if (state.mode === 'processing') {
-    const button = document.querySelector('[aria-label="add"]');
     button.setAttribute('disabled', 'disabled');
     input.readOnly = true;
-    console.log(input.attributes, button.attributes);
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
   }
 
-  if (state.mode !== 'processing') {
-    input.readOnly = false;
-    const button = document.querySelector('[aria-label="add"]');
-    button.removeAttribute('disabled');
-  }
-
   const postModal = document.getElementById('postModal');
   postModal.addEventListener('show.bs.modal', (event) => {
-    const button = event.relatedTarget;
-    button.parentElement.children[0].classList.remove('fw-bold');
-    button.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
+    const targetButton = event.relatedTarget;
+    targetButton.parentElement.children[0].classList.remove('fw-bold');
+    targetButton.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
     const modalTitle = postModal.querySelector('.modal-title');
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');
