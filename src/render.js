@@ -82,7 +82,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'processing') {
-    const buttons = document.getElementsByName('button');
+    const buttons = document.getElementsByName('add');
     input.readOnly = true;
     buttons.forEach((button) => {
       button.disabled = true;
@@ -92,7 +92,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode !== 'processing') {
-    const buttons = document.getElementsByName('button');
+    const buttons = document.getElementsByName('add');
     input.readOnly = false;
     buttons.forEach((button) => {
       button.disabled = false;
