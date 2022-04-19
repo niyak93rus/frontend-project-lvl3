@@ -82,9 +82,10 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'processing') {
-    input.readOnly = true;
     const button = document.querySelector('[aria-label="add"]');
     button.setAttribute('disabled', '');
+    input.readOnly = true;
+    console.log(input.attributes, button.attributes);
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
   }
@@ -92,7 +93,6 @@ const render = (state, i18n) => {
   if (state.mode !== 'processing') {
     input.readOnly = false;
     const button = document.querySelector('[aria-label="add"]');
-    console.log(button);
     button.removeAttribute('disabled');
   }
 
