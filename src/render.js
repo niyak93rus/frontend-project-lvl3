@@ -83,7 +83,7 @@ const render = (state, i18n) => {
 
   if (state.mode === 'processing') {
     const button = document.querySelector('[aria-label="add"]');
-    button.setAttribute('disabled', '');
+    button.setAttribute('disabled', 'disabled');
     input.readOnly = true;
     console.log(input.attributes, button.attributes);
     feedback.textContent = state.feedback;
