@@ -23,8 +23,8 @@ const renderFeeds = (state, i18n) => {
       const postCard = document.createElement('div');
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
       <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
-      <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
-      data-bs-toggle="modal" data-bs-target="#postModal">${i18n.t('buttonTextShow')}</button></li>`;
+      <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
+      data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
       postList.prepend(postCard);
     });
   });
@@ -81,8 +81,8 @@ const render = (state, i18n) => {
       const postCard = document.createElement('div');
       postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
       <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
-      <button class='btn btn-outline-primary btn-sm' data-bs-postId="${postId}"
-      data-bs-toggle="modal" data-bs-target="#postModal">${i18n.t('buttonTextShow')}</button></li>`;
+      <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
+      data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
       postList.prepend(postCard);
     });
   }
@@ -99,19 +99,22 @@ const render = (state, i18n) => {
     feedback.classList.add('text-danger');
   }
 
-  const postModal = document.getElementById('postModal');
-  postModal.addEventListener('show.bs.modal', (event) => {
+  const postModal = document.getElementById('modal');
+  console.log(postModal);
+  postModal.addEventListener('shown.bs.modal', (event) => {
+    console.log('event');
     const targetButton = event.relatedTarget;
     targetButton.parentElement.children[0].classList.remove('fw-bold');
     targetButton.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
     const modalTitle = postModal.querySelector('.modal-title');
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');
-    const relatedPostId = button.getAttribute('data-bs-postId');
+    const relatedPostId = targetButton.getAttribute('data-bs-postId');
     const relatedPost = allPosts.filter((post) => post.postId === relatedPostId);
-    modalTitle.textContent = relatedPost[0].postTitle;
-    modalBody.textContent = relatedPost[0].description;
-    modalFooter.innerHTML = `<a href="${relatedPost[0].linkTrimmed}" role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
+    modalTitle.innerHTML = relatedPost[0].postTitle;
+    modalBody.innerHTML = relatedPost[0].description;
+    modalFooter.innerHTML = `<a href="${relatedPost[0].linkTrimmed}"
+   role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
   });
 };
