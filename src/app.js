@@ -37,7 +37,6 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       const XML = response.request.response;
       const feed = parseXML(XML);
       const parsedFeed = parseFeed(feed);
-      watchedState.urls.push(userUrl);
       watchedState.status = 'valid';
       watchedState.feeds.push(parsedFeed);
       watchedState.feedback = i18n.t('successMessage');
@@ -104,30 +103,21 @@ const app = (schema, i18nInstance, watchedState) => {
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    watchedState.mode = 'processing';
     const data = new FormData(urlForm);
     const url = data.get('url');
-    schema.isValid({ url })
-      .then((result) => {
-        if (result) {
-          if (watchedState.urls.includes(url)) {
-            watchedState.status = 'invalid';
-            watchedState.feedback = i18nInstance.t('existsError');
-            watchedState.mode = 'filling';
-          } else {
-            loadPosts(url, watchedState, i18nInstance);
-          }
-        }
-        if (!result) {
-          watchedState.status = 'invalid';
-          watchedState.feedback = i18nInstance.t('validError');
-          watchedState.mode = 'filling';
-        }
+    if (url !== '') {
+      watchedState.mode = 'processing';
+    }
+    schema.validate({ url })
+      .then(() => {
+        watchedState.urls.push(url);
+        loadPosts(url, watchedState, i18nInstance);
       })
       .catch((err) => {
         watchedState.status = 'invalid';
-        watchedState.feedback = err;
-        console.log(err);
+        watchedState.feedback = err.message;
+        console.log(`ОШИБКА: ${err.message}`, `---URL: ${url}`);
+        watchedState.mode = 'filling';
       });
     // updateFeed(watchedState, i18nInstance);
   });
