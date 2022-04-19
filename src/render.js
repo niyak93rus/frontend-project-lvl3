@@ -30,12 +30,6 @@ const renderFeeds = (state, i18n) => {
   });
 };
 
-const blockButton = (button, i18n) => {
-  button.addEventListener('click', () => {
-    throw new Error(i18n.t('networkError'));
-  });
-};
-
 const render = (state, i18n) => {
   const allPosts = state.feeds.reduce((all, curr) => {
     Object.assign(all, curr.posts);
@@ -95,7 +89,6 @@ const render = (state, i18n) => {
     });
     buttons.forEach((button) => {
       button.disabled = true;
-      blockButton(button, i18n);
     });
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
