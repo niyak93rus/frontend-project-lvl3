@@ -72,7 +72,6 @@ const getPostIds = (watchedObject) => {
 };
 
 const updateFeed = (watchedObject, i18n) => {
-  watchedObject.mode = 'waiting';
   watchedObject.urls.forEach((url) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
     const newUrl = new URL(allOriginsProxy);
@@ -93,10 +92,10 @@ const updateFeed = (watchedObject, i18n) => {
         });
       })
       .catch((error) => {
-        watchedObject.mode = 'waiting';
         watchedObject.status = 'invalid';
         watchedObject.feedback = i18n.t('invalidRSS');
         console.log(error);
+        watchedObject.mode = 'filling';
       });
   });
   setTimeout(updateFeed, delay, watchedObject, i18n);
