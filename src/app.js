@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 
-const delay = 5000;
+// const delay = 5000;
 
 const parseXML = (data) => {
   const parser = new DOMParser();
@@ -32,9 +32,9 @@ const parseFeed = (feed) => {
 const loadPosts = (userUrl, watchedObject, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
   const url = new URL(allOriginsProxy);
-  watchedObject.mode = 'processing';
   axios.get(url)
     .then((response) => {
+      watchedObject.mode = 'processing';
       const XML = response.request.response;
       const feed = parseXML(XML);
       const parsedFeed = parseFeed(feed);
@@ -46,57 +46,60 @@ const loadPosts = (userUrl, watchedObject, i18n) => {
     })
     .catch((error) => {
       console.log(error);
+      watchedObject.mode = 'processing';
       if (error.message === 'Network Error') {
         watchedObject.status = 'invalid';
         watchedObject.feedback = i18n.t('networkError');
+        watchedObject.mode = 'filling';
       } else {
         watchedObject.status = 'invalid';
         watchedObject.feedback = i18n.t('invalidRSS');
+        watchedObject.mode = 'filling';
       }
     });
 };
 
-const getPostIds = (watchedObject) => {
-  const allPosts = watchedObject.feeds.reduce((all, curr) => {
-    Object.assign(all, curr.posts);
-    return all;
-  }, []);
-  const allPostIds = allPosts.reduce((all, curr) => {
-    all.push(curr.postId);
-    return all;
-  }, []);
-  return allPostIds;
-};
+// const getPostIds = (watchedObject) => {
+//   const allPosts = watchedObject.feeds.reduce((all, curr) => {
+//     Object.assign(all, curr.posts);
+//     return all;
+//   }, []);
+//   const allPostIds = allPosts.reduce((all, curr) => {
+//     all.push(curr.postId);
+//     return all;
+//   }, []);
+//   return allPostIds;
+// };
 
-const updateFeed = (watchedObject, i18n) => {
-  watchedObject.urls.forEach((url) => {
-    const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
-    const newUrl = new URL(allOriginsProxy);
-    axios.get(newUrl)
-      .then((response) => {
-        const XML = response.request.response;
-        const feed = parseXML(XML);
-        const parsedFeed = parseFeed(feed);
-        watchedObject.feeds.forEach((stateFeed) => {
-          parsedFeed.posts.forEach((post) => {
-            if (!getPostIds(watchedObject).includes(post.postId)) {
-              if (stateFeed.channelTitle === parsedFeed.channelTitle) {
-                stateFeed.posts.push(post);
-                watchedObject.mode = 'updateFeed';
-              }
-            }
-          });
-        });
-      })
-      .catch((error) => {
-        watchedObject.mode = 'filling';
-        watchedObject.status = 'invalid';
-        watchedObject.feedback = i18n.t('invalidRSS');
-        console.log(error);
-      });
-  });
-  setTimeout(updateFeed, delay, watchedObject, i18n);
-};
+// const updateFeed = (watchedObject, i18n) => {
+//   watchedObject.urls.forEach((url) => {
+//     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+//     const newUrl = new URL(allOriginsProxy);
+//     axios.get(newUrl)
+//       .then((response) => {
+//         const XML = response.request.response;
+//         const feed = parseXML(XML);
+//         const parsedFeed = parseFeed(feed);
+//         watchedObject.feeds.forEach((stateFeed) => {
+//           parsedFeed.posts.forEach((post) => {
+//             if (!getPostIds(watchedObject).includes(post.postId)) {
+//               if (stateFeed.channelTitle === parsedFeed.channelTitle) {
+//                 stateFeed.posts.push(post);
+//                 watchedObject.mode = 'updateFeed';
+//               }
+//             }
+//           });
+//         });
+//       })
+//       .catch((error) => {
+//         watchedObject.mode = 'filling';
+//         watchedObject.status = 'invalid';
+//         watchedObject.feedback = i18n.t('invalidRSS');
+//         console.log(error);
+//       });
+//   });
+//   setTimeout(updateFeed, delay, watchedObject, i18n);
+// };
 
 const app = (_state, schema, i18nInstance, watchedObject) => {
   watchedObject.mode = 'filling';
@@ -125,7 +128,7 @@ const app = (_state, schema, i18nInstance, watchedObject) => {
         watchedObject.status = 'invalid';
         console.log(err);
       });
-    updateFeed(watchedObject, i18nInstance);
+    // updateFeed(watchedObject, i18nInstance);
   });
 };
 

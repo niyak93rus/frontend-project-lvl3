@@ -5,7 +5,6 @@ import runApp from './app.js';
 import ru from './resources.js';
 import render from './render.js';
 
-export const i18nInstance = i18next.createInstance();
 export default () => {
   const state = {
     urls: [],
@@ -13,8 +12,9 @@ export default () => {
     feedback: null,
     status: null,
     mode: null,
-    newPosts: [],
   };
+
+  const i18nInstance = i18next.createInstance();
 
   i18nInstance.init({
     lng: 'ru',
