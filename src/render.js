@@ -37,8 +37,6 @@ const blockButton = (button, i18n) => {
 };
 
 const render = (state, i18n) => {
-  console.log(state.mode);
-
   const allPosts = state.feeds.reduce((all, curr) => {
     Object.assign(all, curr.posts);
     return all;
@@ -90,7 +88,6 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'processing') {
-    console.log('processing');
     const buttons = document.getElementsByName('button');
     const inputs = document.getElementsByName('url');
     inputs.forEach((item) => {
@@ -102,7 +99,6 @@ const render = (state, i18n) => {
     });
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
-    console.log(document.querySelector('#input-url').getAttribute('readonly'));
   }
 
   if (state.mode === 'filling' || state.mode === 'showFeed' || state.mode === 'updateFeed' || state.mode === 'waiting') {
