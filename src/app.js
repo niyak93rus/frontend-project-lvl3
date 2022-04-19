@@ -30,7 +30,6 @@ const parseFeed = (feed) => {
 };
 
 const loadPosts = (userUrl, watchedState, i18n) => {
-  watchedState.mode = 'processing';
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
   const url = new URL(allOriginsProxy);
   axios.get(url)
@@ -115,6 +114,7 @@ const app = (schema, i18nInstance, watchedState) => {
             watchedState.feedback = i18nInstance.t('existsError');
             watchedState.mode = 'filling';
           } else {
+            watchedState.mode = 'processing';
             loadPosts(url, watchedState, i18nInstance);
           }
         }
