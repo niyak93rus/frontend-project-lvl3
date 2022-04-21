@@ -1,10 +1,12 @@
 /* eslint-disable no-param-reassign */
+import _ from 'lodash';
+
 const renderFeeds = (state, i18n) => {
-  document.querySelector('.feeds').innerHTML = '';
-  document.querySelector('.posts').innerHTML = '';
+  document.querySelector('.feeds').innerHTML = '<h2 class="card-title h4">Фиды</h2>';
+  document.querySelector('.posts').innerHTML = '<h2 class="card-title h4">Посты</h2>';
   const feedList = document.createElement('ul');
   feedList.classList.add('list-group', 'card', 'border-0');
-  document.querySelector('.feeds').prepend(feedList);
+  document.querySelector('.feeds').append(feedList);
   const postList = document.createElement('ul');
   postList.classList.add('post-list', 'list-group', 'card-body', 'border-0');
   document.querySelector('.posts').append(postList);
@@ -17,7 +19,8 @@ const renderFeeds = (state, i18n) => {
     feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
     feedList.prepend(feedCard);
 
-    feed.posts.forEach((post) => {
+    const sortedPosts = _.sortBy(feed.posts, ['post', 'postDate']);
+    sortedPosts.forEach((post) => {
       const { postTitle, postId } = post;
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');
@@ -75,7 +78,8 @@ const render = (state, i18n) => {
     input.readOnly = false;
     const postList = document.querySelector('.post-list');
     postList.innerHTML = '';
-    allPosts.forEach((post) => {
+    const sortedPosts = _.sortBy(allPosts, ['post', 'postDate']);
+    sortedPosts.forEach((post) => {
       const { postTitle, postId } = post;
       const link = post.linkTrimmed;
       const postCard = document.createElement('div');
@@ -100,9 +104,7 @@ const render = (state, i18n) => {
   }
 
   const postModal = document.getElementById('modal');
-  console.log(postModal);
   postModal.addEventListener('shown.bs.modal', (event) => {
-    console.log('event');
     const targetButton = event.relatedTarget;
     targetButton.parentElement.children[0].classList.remove('fw-bold');
     targetButton.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
@@ -110,10 +112,10 @@ const render = (state, i18n) => {
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
-    const relatedPost = allPosts.filter((post) => post.postId === relatedPostId);
-    modalTitle.innerHTML = relatedPost[0].postTitle;
-    modalBody.innerHTML = relatedPost[0].description;
-    modalFooter.innerHTML = `<a href="${relatedPost[0].linkTrimmed}"
+    const relatedPost = allPosts.filter((post) => post.postId === Number(relatedPostId))[0];
+    modalTitle.innerHTML = relatedPost.postTitle;
+    modalBody.innerHTML = relatedPost.description;
+    modalFooter.innerHTML = `<a href="${relatedPost.linkTrimmed}"
    role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
   });

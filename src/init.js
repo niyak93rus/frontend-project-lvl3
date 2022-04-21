@@ -12,6 +12,7 @@ export default () => {
     feedback: null,
     status: null,
     mode: null,
+    postIdCounter: 0,
   };
 
   const i18nInstance = i18next.createInstance();

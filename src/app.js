@@ -3,24 +3,29 @@ import axios from 'axios';
 
 const delay = 5000;
 
-const parseXML = (data) => {
+const parseXML = (data, format) => {
   const parser = new DOMParser();
-  return parser.parseFromString(data, 'text/html');
+  return parser.parseFromString(data, format);
 };
 
-const parseFeed = (feed) => {
+const normalizeXML = (str) => str.replace('&lt;![CDATA[', '').replace(']]&gt;', '').replace('<!--[CDATA[', '').replace(']]-->', '');
+
+const parseFeed = (watchedState, feed) => {
   const feedObject = {};
-  feedObject.channelTitle = feed.querySelector('channel > title').innerHTML;
-  feedObject.channelDescription = feed.querySelector('channel > description').innerHTML;
+  const channelTitle = normalizeXML(feed.querySelector('channel > title').innerHTML);
+  feedObject.channelTitle = channelTitle;
+  const channelDescription = normalizeXML(feed.querySelector('channel > description').innerHTML);
+  feedObject.channelDescription = channelDescription;
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = postItemsArray.map((item) => {
-    const postTitle = item.querySelector('title').innerHTML;
-    const description = item.querySelector('description').innerHTML;
+    const postTitle = normalizeXML(item.querySelector('title').innerHTML);
+    const description = normalizeXML(item.querySelector('description').innerHTML);
     const link = item.querySelector('link').nextSibling.textContent;
     const linkTrimmed = link.trim().slice(0, -2);
     const postDate = item.querySelector('pubdate').innerHTML;
-    const postId = item.querySelector('guid').textContent;
+    const postId = watchedState.postIdCounter;
+    watchedState.postIdCounter += 1;
     return {
       postTitle, description, linkTrimmed, postDate, postId,
     };
@@ -35,9 +40,9 @@ const loadPosts = (userUrl, watchedState, i18n) => {
   watchedState.mode = 'processing';
   axios.get(url)
     .then((response) => {
-      const XML = response.request.response;
-      const feed = parseXML(XML);
-      const parsedFeed = parseFeed(feed);
+      const XML = response.data.contents;
+      const feed = parseXML(XML, 'text/html');
+      const parsedFeed = parseFeed(watchedState, feed);
       watchedState.status = 'valid';
       watchedState.feeds.push(parsedFeed);
       watchedState.feedback = i18n.t('successMessage');
@@ -76,8 +81,8 @@ const updateFeed = (watchedState, i18n) => {
     axios.get(newUrl)
       .then((response) => {
         const XML = response.request.response;
-        const feed = parseXML(XML);
-        const parsedFeed = parseFeed(feed);
+        const feed = parseXML(XML, 'text/html');
+        const parsedFeed = parseFeed(watchedState, feed);
         watchedState.feeds.forEach((stateFeed) => {
           parsedFeed.posts.forEach((post) => {
             if (!getPostIds(watchedState).includes(post.postId)) {
