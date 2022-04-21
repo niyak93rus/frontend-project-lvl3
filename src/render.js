@@ -10,8 +10,8 @@ const renderModal = (postCard, post) => {
     modalTitle.innerHTML = post.postTitle;
     modalBody.innerHTML = post.description;
     modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
-   role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
+   role="button" class="btn btn-primary full-article" data-bs-postId=${post.postId} target="_blank">Читать полностью</a>
+    <button type="button" class="btn btn-secondary" data-bs-postId=${post.postId} data-bs-dismiss="modal">Закрыть</button>`;
   });
 };
 

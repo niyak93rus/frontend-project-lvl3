@@ -123,12 +123,14 @@ const app = (schema, i18nInstance, watchedState) => {
     // updateFeed(watchedState, i18nInstance);
   });
   const postModal = document.getElementById('modal');
-  postModal.addEventListener('shown.bs.modal', (event) => {
-    const targetButton = event.relatedTarget;
+  postModal.addEventListener('click', (event) => {
+    const targetButton = event.target;
+    console.log(targetButton);
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
     watchedState.posts
       .forEach((post) => {
         if (post.postId === Number(relatedPostId)) {
+          console.log(relatedPostId);
           post.visited = true;
         }
       });
