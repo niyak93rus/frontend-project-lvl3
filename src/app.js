@@ -133,6 +133,7 @@ const app = (schema, i18nInstance, watchedState) => {
     const relatedPost = watchedState.posts
       .find((post) => post.postId === Number(relatedPostId));
     watchedState.relatedPost = relatedPost;
+    watchedState.targetButton = targetButton;
     watchedState.mode = 'showModal';
   });
 };

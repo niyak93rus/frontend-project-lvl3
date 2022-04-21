@@ -33,12 +33,25 @@ const renderFeeds = (state, i18n) => {
   });
 };
 
-const render = (state, i18n) => {
-  const allPosts = state.feeds.reduce((all, curr) => {
-    Object.assign(all, curr.posts);
-    return all;
-  }, []);
+const updateFeed = (button, input, state, i18n) => {
+  button.disabled = false;
+  input.readOnly = false;
+  const postList = document.querySelector('.post-list');
+  postList.innerHTML = '';
+  const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  sortedPosts.forEach((post) => {
+    const { postTitle, postId } = post;
+    const link = post.linkTrimmed;
+    const postCard = document.createElement('div');
+    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
+    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
+    data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postList.prepend(postCard);
+  });
+};
 
+const render = (state, i18n) => {
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
   const postModal = document.getElementById('modal');
@@ -75,21 +88,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'updateFeed') {
-    button.disabled = false;
-    input.readOnly = false;
-    const postList = document.querySelector('.post-list');
-    postList.innerHTML = '';
-    const sortedPosts = _.sortBy(allPosts, ['post', 'postDate']);
-    sortedPosts.forEach((post) => {
-      const { postTitle, postId } = post;
-      const link = post.linkTrimmed;
-      const postCard = document.createElement('div');
-      postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
-      <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
-      <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
-      data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-      postList.prepend(postCard);
-    });
+    updateFeed(button, input, state, i18n);
   }
 
   if (state.mode === 'filling') {
@@ -105,8 +104,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'showModal') {
-    // targetButton.parentElement.children[0].classList.remove('fw-bold');
-    // targetButton.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
+    // updateFeed(button, input, state, i18n);
     const modalTitle = postModal.querySelector('.modal-title');
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');
