@@ -2,6 +2,7 @@
 import _ from 'lodash';
 
 const renderFeeds = (state, i18n) => {
+  const postModal = document.getElementById('modal');
   document.querySelector('.feeds').innerHTML = '<h2 class="card-title h4">Фиды</h2>';
   document.querySelector('.posts').innerHTML = '<h2 class="card-title h4">Посты</h2>';
   const feedList = document.createElement('ul');
@@ -29,6 +30,16 @@ const renderFeeds = (state, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postCard.querySelector('button').addEventListener('click', () => {
+      const modalTitle = postModal.querySelector('.modal-title');
+      const modalBody = postModal.querySelector('.modal-body');
+      const modalFooter = postModal.querySelector('.modal-footer');
+      modalTitle.innerHTML = post.postTitle;
+      modalBody.innerHTML = post.description;
+      modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
+     role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
+    });
     postList.prepend(postCard);
   });
 };
@@ -54,7 +65,6 @@ const updateFeed = (button, input, state, i18n) => {
 const render = (state, i18n) => {
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
-  const postModal = document.getElementById('modal');
 
   const lastMessage = document.querySelector('.feedback');
   if (lastMessage !== null) {
@@ -101,18 +111,6 @@ const render = (state, i18n) => {
     input.readOnly = true;
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
-  }
-
-  if (state.mode === 'showModal') {
-    // updateFeed(button, input, state, i18n);
-    const modalTitle = postModal.querySelector('.modal-title');
-    const modalBody = postModal.querySelector('.modal-body');
-    const modalFooter = postModal.querySelector('.modal-footer');
-    modalTitle.innerHTML = state.relatedPost.postTitle;
-    modalBody.innerHTML = state.relatedPost.description;
-    modalFooter.innerHTML = `<a href="${state.relatedPost.linkTrimmed}"
-   role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
   }
 };
 

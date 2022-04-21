@@ -35,7 +35,6 @@ const parseFeed = (watchedState, feed) => {
     };
   });
   watchedState.posts.push(...posts);
-  console.log(watchedState.posts);
   return feedObject;
 };
 
@@ -124,17 +123,6 @@ const app = (schema, i18nInstance, watchedState) => {
         watchedState.mode = 'filling';
       });
     // updateFeed(watchedState, i18nInstance);
-  });
-
-  const postModal = document.getElementById('modal');
-  postModal.addEventListener('shown.bs.modal', (event) => {
-    const targetButton = event.relatedTarget;
-    const relatedPostId = targetButton.getAttribute('data-bs-postId');
-    const relatedPost = watchedState.posts
-      .find((post) => post.postId === Number(relatedPostId));
-    watchedState.relatedPost = relatedPost;
-    watchedState.targetButton = targetButton;
-    watchedState.mode = 'showModal';
   });
 };
 
