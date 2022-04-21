@@ -18,18 +18,18 @@ const renderFeeds = (state, i18n) => {
     const feedCard = document.createElement('div');
     feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
     feedList.prepend(feedCard);
+  });
 
-    const sortedPosts = _.sortBy(feed.posts, ['post', 'postDate']);
-    sortedPosts.forEach((post) => {
-      const { postTitle, postId } = post;
-      const link = post.linkTrimmed;
-      const postCard = document.createElement('div');
-      postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
-      <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
-      <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
-      data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-      postList.prepend(postCard);
-    });
+  const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  sortedPosts.forEach((post) => {
+    const { postTitle, postId } = post;
+    const link = post.linkTrimmed;
+    const postCard = document.createElement('div');
+    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
+    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
+    data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postList.prepend(postCard);
   });
 };
 
@@ -41,6 +41,7 @@ const render = (state, i18n) => {
 
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
+  const postModal = document.getElementById('modal');
 
   const lastMessage = document.querySelector('.feedback');
   if (lastMessage !== null) {
@@ -103,22 +104,18 @@ const render = (state, i18n) => {
     feedback.classList.add('text-danger');
   }
 
-  const postModal = document.getElementById('modal');
-  postModal.addEventListener('shown.bs.modal', (event) => {
-    const targetButton = event.relatedTarget;
-    targetButton.parentElement.children[0].classList.remove('fw-bold');
-    targetButton.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
+  if (state.mode === 'showModal') {
+    // targetButton.parentElement.children[0].classList.remove('fw-bold');
+    // targetButton.parentElement.children[0].classList.add('fw-normal', 'link-secondary');
     const modalTitle = postModal.querySelector('.modal-title');
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');
-    const relatedPostId = targetButton.getAttribute('data-bs-postId');
-    const relatedPost = allPosts.filter((post) => post.postId === Number(relatedPostId))[0];
-    modalTitle.innerHTML = relatedPost.postTitle;
-    modalBody.innerHTML = relatedPost.description;
-    modalFooter.innerHTML = `<a href="${relatedPost.linkTrimmed}"
+    modalTitle.innerHTML = state.relatedPost.postTitle;
+    modalBody.innerHTML = state.relatedPost.description;
+    modalFooter.innerHTML = `<a href="${state.relatedPost.linkTrimmed}"
    role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
-  });
+  }
 };
 
 export default render;

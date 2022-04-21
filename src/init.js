@@ -9,6 +9,7 @@ export default () => {
   const state = {
     urls: [],
     feeds: [],
+    posts: [],
     feedback: null,
     status: null,
     mode: null,
