@@ -1,8 +1,6 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 
-// const delay = 5000;
-
 const parseXML = (data, format) => {
   const parser = new DOMParser();
   return parser.parseFromString(data, format);
@@ -101,7 +99,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
 //         console.log(error);
 //       });
 //   });
-//   setTimeout(updateFeed, delay, watchedState, i18n);
+//   setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
 // };
 
 const app = (schema, i18nInstance, watchedState) => {
@@ -123,6 +121,19 @@ const app = (schema, i18nInstance, watchedState) => {
         watchedState.mode = 'filling';
       });
     // updateFeed(watchedState, i18nInstance);
+  });
+  const postModal = document.getElementById('modal');
+  postModal.addEventListener('shown.bs.modal', (event) => {
+    const targetButton = event.relatedTarget;
+    const relatedPostId = targetButton.getAttribute('data-bs-postId');
+    watchedState.posts
+      .forEach((post) => {
+        if (post.postId === Number(relatedPostId)) {
+          post.visited = true;
+        }
+      });
+    watchedState.mode = 'showModal';
+    watchedState.mode = 'showFeed';
   });
 };
 

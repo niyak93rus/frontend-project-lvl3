@@ -14,6 +14,9 @@ export default () => {
     status: null,
     mode: null,
     postIdCounter: 0,
+    update: {
+      delay: 5000,
+    },
   };
 
   const i18nInstance = i18next.createInstance();
