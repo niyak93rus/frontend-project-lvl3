@@ -65,11 +65,11 @@ const updateFeed = (button, input, state, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    postList.prepend(postCard);
     renderModal(postCard, post);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
+    postList.prepend(postCard);
   });
 };
 

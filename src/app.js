@@ -132,7 +132,6 @@ const app = (schema, i18nInstance, watchedState) => {
           post.visited = true;
         }
       });
-    watchedState.mode = 'showModal';
     watchedState.mode = 'showFeed';
   });
 };
