@@ -122,14 +122,15 @@ const app = (schema, i18nInstance, watchedState) => {
       });
     // updateFeed(watchedState, i18nInstance);
   });
-  const postModal = document.getElementById('modal');
-  postModal.addEventListener('shown.bs.modal', (event) => {
-    const targetButton = event.relatedTarget;
+  const postsArea = document.querySelector('.posts');
+  postsArea.addEventListener('click', (event) => {
+    const targetButton = event.target;
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
     watchedState.posts
       .forEach((post) => {
         if (post.postId === Number(relatedPostId)) {
           post.visited = true;
+          watchedState.relatedPost = post;
         }
       });
     watchedState.mode = 'showModal';

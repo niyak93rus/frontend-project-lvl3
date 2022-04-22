@@ -1,18 +1,17 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 
-const renderModal = (postCard, post) => {
+const renderModal = (post) => {
+  console.log(post);
   const postModal = document.getElementById('modal');
-  postCard.querySelector('button').addEventListener('click', () => {
-    const modalTitle = postModal.querySelector('.modal-title');
-    const modalBody = postModal.querySelector('.modal-body');
-    const modalFooter = postModal.querySelector('.modal-footer');
-    modalTitle.innerHTML = post.postTitle;
-    modalBody.innerHTML = post.description;
-    modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
-   role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
-  });
+  const modalTitle = postModal.querySelector('.modal-title');
+  const modalBody = postModal.querySelector('.modal-body');
+  const modalFooter = postModal.querySelector('.modal-footer');
+  modalTitle.innerHTML = post.postTitle;
+  modalBody.innerHTML = post.description;
+  modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
+  role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
 
 const renderFeeds = (state, i18n) => {
@@ -44,9 +43,8 @@ const renderFeeds = (state, i18n) => {
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
     postCard.querySelector('button').addEventListener('click', () => {
-      state.mode = 'showingModal';
+      renderModal(post);
     });
-    renderModal(postCard, post);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
@@ -69,10 +67,7 @@ const updateFeed = (button, input, state, i18n) => {
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
     postList.prepend(postCard);
-    postCard.querySelector('button').addEventListener('click', () => {
-      state.mode = 'showingModal';
-    });
-    renderModal(postCard, post);
+
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
@@ -132,6 +127,7 @@ const render = (state, i18n) => {
   }
 
   if (state.mode === 'showModal') {
+    renderModal(state.relatedPost);
     updateFeed(button, input, state, i18n);
   }
 };
