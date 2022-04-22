@@ -1,9 +1,16 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 
-const renderModal = (postCard, post) => {
+const renderModal = (state, postCard, post) => {
   const postModal = document.getElementById('modal');
-  postCard.querySelector('button').addEventListener('click', () => {
+  postCard.querySelector('button').addEventListener('click', (event) => {
+    const targetButton = event.target;
+    state.posts.forEach((statePost) => {
+      console.log(statePost.postId, Number(targetButton.getAttribute('data-bs-postId')));
+      if (statePost.postId === Number(targetButton.getAttribute('data-bs-postId'))) {
+        statePost.visited = true;
+      }
+    });
     const modalTitle = postModal.querySelector('.modal-title');
     const modalBody = postModal.querySelector('.modal-body');
     const modalFooter = postModal.querySelector('.modal-footer');
@@ -43,7 +50,7 @@ const renderFeeds = (state, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    renderModal(postCard, post);
+    renderModal(state, postCard, post);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
@@ -65,11 +72,11 @@ const updateFeed = (button, input, state, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    renderModal(postCard, post);
+    renderModal(state, postCard, post);
+    postList.prepend(postCard);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
-    postList.prepend(postCard);
   });
 };
 
