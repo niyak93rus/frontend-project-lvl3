@@ -30,43 +30,43 @@ const loadPosts = (userUrl, watchedState, i18n) => {
     });
 };
 
-// const getPostIds = (watchedState) => {
-//   const allPostIds = getAllPosts(watchedState).reduce((all, curr) => {
-//     all.push(curr.postId);
-//     return all;
-//   }, []);
-//   return allPostIds;
-// };
+const getPostIds = (watchedState) => {
+  const allPostIds = watchedState.posts.reduce((all, curr) => {
+    all.push(curr.postId);
+    return all;
+  }, []);
+  return allPostIds;
+};
 
-// const updateFeed = (watchedState, i18n) => {
-//   watchedState.urls.forEach((url) => {
-//     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
-//     const newUrl = new URL(allOriginsProxy);
-//     axios.get(newUrl)
-//       .then((response) => {
-//         const XML = response.request.response;
-//         const feed = parseXML(XML, 'text/html');
-//         const parsedFeed = parseFeed(watchedState, feed);
-//         watchedState.feeds.forEach((stateFeed) => {
-//           parsedFeed.posts.forEach((post) => {
-//             if (!getPostIds(watchedState).includes(post.postId)) {
-//               if (stateFeed.channelTitle === parsedFeed.channelTitle) {
-//                 stateFeed.posts.push(post);
-//                 watchedState.mode = 'updateFeed';
-//               }
-//             }
-//           });
-//         });
-//       })
-//       .catch((error) => {
-//         watchedState.mode = 'filling';
-//         watchedState.status = 'invalid';
-//         watchedState.feedback = i18n.t('invalidRSS');
-//         console.log(error);
-//       });
-//   });
-//   setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
-// };
+const updateFeed = (watchedState, i18n) => {
+  watchedState.urls.forEach((url) => {
+    const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+    const newUrl = new URL(allOriginsProxy);
+    axios.get(newUrl)
+      .then((response) => {
+        const XML = response.request.response;
+        const feed = parseXML(XML, 'text/html');
+        const parsedFeed = parseFeed(watchedState, feed);
+        watchedState.feeds.forEach((stateFeed) => {
+          watchedState.posts.forEach((post) => {
+            if (!getPostIds(watchedState).includes(post.postId)) {
+              if (stateFeed.channelTitle === parsedFeed.channelTitle) {
+                stateFeed.newPosts.push(post);
+                watchedState.mode = 'updateFeed';
+              }
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        watchedState.mode = 'filling';
+        watchedState.status = 'invalid';
+        watchedState.feedback = i18n.t('invalidRSS');
+        console.log(error);
+      });
+  });
+  setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
+};
 
 const app = (schema, i18nInstance, watchedState) => {
   watchedState.mode = 'filling';
@@ -83,10 +83,10 @@ const app = (schema, i18nInstance, watchedState) => {
       .catch((err) => {
         watchedState.status = 'invalid';
         watchedState.feedback = err.message;
-        console.log(`ОШИБКА: ${err.message}`, `---URL: ${url}`);
+        console.log(err);
         watchedState.mode = 'filling';
       });
-    // updateFeed(watchedState, i18nInstance);
+    updateFeed(watchedState, i18nInstance);
   });
   const postsArea = document.querySelector('.posts');
   postsArea.addEventListener('click', (event) => {
@@ -95,7 +95,6 @@ const app = (schema, i18nInstance, watchedState) => {
     watchedState.posts
       .forEach((post) => {
         if (post.postId === Number(relatedPostId)) {
-          console.log(post);
           post.visited = true;
           watchedState.relatedPost = post;
         }

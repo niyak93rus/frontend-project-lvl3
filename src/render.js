@@ -2,7 +2,6 @@
 import _ from 'lodash';
 
 const renderModal = (post) => {
-  console.log(post);
   const postModal = document.getElementById('modal');
   const modalTitle = postModal.querySelector('.modal-title');
   const modalBody = postModal.querySelector('.modal-body');
@@ -56,7 +55,7 @@ const updateFeed = (button, input, state, i18n) => {
   button.disabled = false;
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
-  const updatedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  const updatedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
   updatedPosts.forEach((post) => {
     const { postTitle, postId } = post;
     const link = post.linkTrimmed;
@@ -70,7 +69,6 @@ const updateFeed = (button, input, state, i18n) => {
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
-    renderModal(state.relatedPost);
   });
 };
 
