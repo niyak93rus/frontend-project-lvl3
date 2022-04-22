@@ -6,8 +6,8 @@ install-deps:
 lint:
 	npx eslint .
 
-test:
-	npm test
+start:
+	npm run serve
 
 test-coverage:
 	npm test -- --coverage --coverageProvider=v8

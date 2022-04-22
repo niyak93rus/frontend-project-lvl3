@@ -1,25 +1,17 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 
-const renderModal = (state, postCard, post) => {
+const renderModal = (post) => {
+  console.log(post);
   const postModal = document.getElementById('modal');
-  postCard.querySelector('button').addEventListener('click', (event) => {
-    const targetButton = event.target;
-    state.posts.forEach((statePost) => {
-      console.log(statePost.postId, Number(targetButton.getAttribute('data-bs-postId')));
-      if (statePost.postId === Number(targetButton.getAttribute('data-bs-postId'))) {
-        statePost.visited = true;
-      }
-    });
-    const modalTitle = postModal.querySelector('.modal-title');
-    const modalBody = postModal.querySelector('.modal-body');
-    const modalFooter = postModal.querySelector('.modal-footer');
-    modalTitle.innerHTML = post.postTitle;
-    modalBody.innerHTML = post.description;
-    modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
+  const modalTitle = postModal.querySelector('.modal-title');
+  const modalBody = postModal.querySelector('.modal-body');
+  const modalFooter = postModal.querySelector('.modal-footer');
+  modalTitle.innerHTML = post.postTitle;
+  modalBody.innerHTML = post.description;
+  modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
    role="button" class="btn btn-primary full-article" data-bs-postId=${post.postId} target="_blank">Читать полностью</a>
     <button type="button" class="btn btn-secondary" data-bs-postId=${post.postId} data-bs-dismiss="modal">Закрыть</button>`;
-  });
 };
 
 const renderFeeds = (state, i18n) => {
@@ -46,11 +38,10 @@ const renderFeeds = (state, i18n) => {
     const { postTitle, postId } = post;
     const link = post.linkTrimmed;
     const postCard = document.createElement('div');
-    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
+    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    renderModal(state, postCard, post);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
@@ -62,29 +53,27 @@ const updateFeed = (button, input, state, i18n) => {
   button.disabled = false;
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
-  postList.innerHTML = '';
-  const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
-  sortedPosts.forEach((post) => {
+  const updatedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  updatedPosts.forEach((post) => {
     const { postTitle, postId } = post;
     const link = post.linkTrimmed;
     const postCard = document.createElement('div');
-    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0"'>
+    postCard.innerHTML = `<li class="list-group-item d-flex
+   justify-content-between post-card align-items-start border-0 border-end-0"'>
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    renderModal(state, postCard, post);
     postList.prepend(postCard);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
+    renderModal(state.relatedPost);
   });
 };
 
 const render = (state, i18n) => {
-  console.log(state.mode);
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
-
   const lastMessage = document.querySelector('.feedback');
   if (lastMessage !== null) {
     lastMessage.remove();
@@ -116,7 +105,7 @@ const render = (state, i18n) => {
     renderFeeds(state, i18n);
   }
 
-  if (state.mode === 'updateFeed') {
+  if (state.mode === 'showingModal') {
     updateFeed(button, input, state, i18n);
   }
 
@@ -130,10 +119,6 @@ const render = (state, i18n) => {
     input.readOnly = true;
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
-  }
-
-  if (state.mode === 'showModal') {
-    updateFeed(button, input, state, i18n);
   }
 };
 

@@ -1,40 +1,6 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
-
-const parseXML = (data, format) => {
-  const parser = new DOMParser();
-  return parser.parseFromString(data, format);
-};
-
-const normalizeXML = (str) => str
-  .replace('&lt;![CDATA[', '')
-  .replace(']]&gt;', '')
-  .replace('<!--[CDATA[', '')
-  .replace(']]-->', '');
-
-const parseFeed = (watchedState, feed) => {
-  const feedObject = {};
-  const channelTitle = normalizeXML(feed.querySelector('channel > title').innerHTML);
-  feedObject.channelTitle = channelTitle;
-  const channelDescription = normalizeXML(feed.querySelector('channel > description').innerHTML);
-  feedObject.channelDescription = channelDescription;
-  const postItems = feed.querySelectorAll('item');
-  const postItemsArray = Array.from(postItems);
-  const posts = postItemsArray.map((item) => {
-    const postTitle = normalizeXML(item.querySelector('title').innerHTML);
-    const description = normalizeXML(item.querySelector('description').innerHTML);
-    const link = item.querySelector('link').nextSibling.textContent;
-    const linkTrimmed = link.trim().slice(0, -2);
-    const postDate = item.querySelector('pubdate').innerHTML;
-    const postId = watchedState.postIdCounter;
-    watchedState.postIdCounter += 1;
-    return {
-      postTitle, description, linkTrimmed, postDate, postId,
-    };
-  });
-  watchedState.posts.push(...posts);
-  return feedObject;
-};
+import { parseFeed, parseXML } from './parser.js';
 
 const loadPosts = (userUrl, watchedState, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
@@ -130,11 +96,12 @@ const app = (schema, i18nInstance, watchedState) => {
     watchedState.posts
       .forEach((post) => {
         if (post.postId === Number(relatedPostId)) {
+          console.log(post);
           post.visited = true;
+          watchedState.relatedPost = post;
+          watchedState.mode = 'showModal';
         }
       });
-    watchedState.mode = 'showModal';
-    watchedState.mode = 'showFeed';
   });
 };
 
