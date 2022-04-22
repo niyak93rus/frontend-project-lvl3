@@ -10,8 +10,8 @@ const renderModal = (post) => {
   modalTitle.innerHTML = post.postTitle;
   modalBody.innerHTML = post.description;
   modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
-   role="button" class="btn btn-primary full-article" data-bs-postId=${post.postId} target="_blank">Читать полностью</a>
-    <button type="button" class="btn btn-secondary" data-bs-postId=${post.postId} data-bs-dismiss="modal">Закрыть</button>`;
+  role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
 
 const renderFeeds = (state, i18n) => {
@@ -42,6 +42,9 @@ const renderFeeds = (state, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postCard.querySelector('button').addEventListener('click', () => {
+      renderModal(post);
+    });
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
     }
@@ -119,6 +122,11 @@ const render = (state, i18n) => {
     input.readOnly = true;
     feedback.textContent = state.feedback;
     feedback.classList.add('text-danger');
+  }
+
+  if (state.mode === 'showModal') {
+    renderModal(state.relatedPost);
+    updateFeed(button, input, state, i18n);
   }
 };
 
