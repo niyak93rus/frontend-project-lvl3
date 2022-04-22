@@ -66,6 +66,9 @@ const updateFeed = (button, input, state, i18n) => {
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
     postList.prepend(postCard);
+    postCard.querySelector('button').addEventListener('click', () => {
+      state.mode = 'showingModal';
+    });
     renderModal(postCard, post);
     if (post.visited) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
