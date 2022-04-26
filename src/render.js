@@ -86,6 +86,14 @@ const render = (state, i18n) => {
   const feedback = document.createElement('p');
   feedback.classList.add('m-0', 'position-absolute', 'small', 'feedback');
 
+  const links = document.querySelectorAll('a');
+  links.forEach((link) => {
+    link.addEventListener(('click'), () => {
+      link.classList.replace('fw-bold', 'fw-normal');
+      link.classList.add('link-secondary');
+    });
+  });
+
   const column = document.querySelector('.col-md-10');
   if (state.status === 'invalid') {
     input.classList.add('is-invalid');

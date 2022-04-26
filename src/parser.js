@@ -32,7 +32,7 @@ const initialParse = (watchedState, feed) => {
     const postTitle = normalizeXML(item.querySelector('title').innerHTML);
     const description = normalizeXML(item.querySelector('description').innerHTML);
     const link = item.querySelector('link').nextSibling.textContent;
-    const linkTrimmed = link.trim().slice(0, -2);
+    const linkTrimmed = link.trim();
     const postDate = item.querySelector('pubdate').innerHTML;
     const postId = getPostID(item.querySelector('guid').innerHTML);
     watchedState.postIdCounter += 1;
@@ -52,7 +52,7 @@ const updateParse = (watchedState, feed) => {
       const postTitle = normalizeXML(item.querySelector('title').innerHTML);
       const description = normalizeXML(item.querySelector('description').innerHTML);
       const link = item.querySelector('link').nextSibling.textContent;
-      const linkTrimmed = link.trim().slice(0, -2);
+      const linkTrimmed = link.trim();
       const postDate = item.querySelector('pubdate').innerHTML;
       const postId = getPostID(item.querySelector('guid').innerHTML);
       watchedState.postIdCounter += 1;
