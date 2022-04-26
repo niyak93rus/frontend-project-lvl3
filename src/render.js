@@ -13,6 +13,13 @@ const renderModal = (post) => {
   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
 
+const markLinkVisited = (state) => {
+  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
+  const neighbourLink = button.parentNode.children[0];
+  neighbourLink.classList.replace('fw-bold', 'fw-normal');
+  neighbourLink.classList.add('link-secondary');
+};
+
 const renderFeeds = (state, i18n) => {
   document.querySelector('.feeds').innerHTML = '<h2 class="card-title h4">Фиды</h2>';
   document.querySelector('.posts').innerHTML = '<h2 class="card-title h4">Посты</h2>';
@@ -44,9 +51,6 @@ const renderFeeds = (state, i18n) => {
     postCard.querySelector('button').addEventListener('click', () => {
       renderModal(post);
     });
-    if (post.visited) {
-      postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
-    }
     postList.prepend(postCard);
   });
 };
@@ -60,15 +64,14 @@ const updateFeed = (button, input, state, i18n) => {
     const { postTitle, postId } = post;
     const link = post.linkTrimmed;
     const postCard = document.createElement('div');
-    postCard.innerHTML = `<li class="list-group-item d-flex
-   justify-content-between post-card align-items-start border-0 border-end-0"'>
+    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
-    data-toggle="modal" data-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postCard.querySelector('button').addEventListener('click', () => {
+      renderModal(post);
+    });
     postList.prepend(postCard);
-    if (post.visited) {
-      postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
-    }
   });
 };
 
@@ -100,7 +103,7 @@ const render = (state, i18n) => {
     column.append(feedback);
   }
 
-  if (state.mode === 'showFeed') {
+  if (state.mode === 'showingFeed') {
     button.disabled = false;
     input.readOnly = false;
     renderFeeds(state, i18n);
@@ -118,8 +121,8 @@ const render = (state, i18n) => {
     feedback.classList.add('text-danger');
   }
 
-  if (state.mode === 'showModal') {
-    renderModal(state.relatedPost);
+  if (state.mode === 'showingModal') {
+    markLinkVisited(state);
   }
 
   if (state.mode === 'updatingFeed') {

@@ -14,7 +14,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       watchedState.status = 'valid';
       watchedState.feeds.push(parsedFeed);
       watchedState.feedback = i18n.t('successMessage');
-      watchedState.mode = 'showFeed';
+      watchedState.mode = 'showingFeed';
       watchedState.mode = 'filling';
     })
     .catch((error) => {
@@ -55,7 +55,7 @@ const updateFeed = (watchedState, i18n) => {
         console.log(error);
       });
   });
-  setTimeout(updateFeed, watchedState.update.delay, watchedState);
+  setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
 };
 
 const app = (schema, i18nInstance, watchedState) => {
@@ -82,13 +82,12 @@ const app = (schema, i18nInstance, watchedState) => {
   postsArea.addEventListener('click', (event) => {
     const targetButton = event.target;
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
-    watchedState.posts
-      .forEach((post) => {
-        if (post.postId === Number(relatedPostId)) {
-          post.visited = true;
-          watchedState.relatedPost = post;
-        }
-      });
+    watchedState.posts.forEach((post) => {
+      if (Number(post.postId) === Number(relatedPostId)) {
+        watchedState.relatedPostId = post.postId;
+        watchedState.mode = 'showingModal';
+      }
+    });
   });
 };
 
