@@ -19,11 +19,11 @@ Simply copy and paste in the textbox a link with RSS. Then click 'Add' or Enter 
 
 ### To run locally on your machine:
 
-  # install dependencies 
-  npm ci 
-  # let your system run the package 
-  npm link
-  # build the webpack
-  npm run build
-  # run the webpack on localhost 
-  npm run serve
+  #### install dependencies 
+  `npm ci`
+  #### let your system run the package 
+  `npm link`
+  #### build the webpack
+  `npm run build`
+  #### run the webpack on localhost 
+  `npm run serve`
