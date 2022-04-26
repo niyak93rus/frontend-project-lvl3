@@ -106,10 +106,6 @@ const render = (state, i18n) => {
     renderFeeds(state, i18n);
   }
 
-  if (state.mode === 'showingModal') {
-    updateFeed(button, input, state, i18n);
-  }
-
   if (state.mode === 'filling') {
     button.disabled = false;
     input.readOnly = false;
@@ -124,6 +120,9 @@ const render = (state, i18n) => {
 
   if (state.mode === 'showModal') {
     renderModal(state.relatedPost);
+  }
+
+  if (state.mode === 'updatingFeed') {
     updateFeed(button, input, state, i18n);
   }
 };

@@ -10,7 +10,17 @@ const normalizeXML = (str) => str
   .replace('<!--[CDATA[', '')
   .replace(']]-->', '');
 
-const parseFeed = (watchedState, feed) => {
+const getPostID = (str) => str.replace(/\D+/g, '');
+
+const getPostIds = (watchedState) => {
+  const allPostIds = watchedState.posts.reduce((all, curr) => {
+    all.push(curr.postId);
+    return all;
+  }, []);
+  return allPostIds;
+};
+
+const initialParse = (watchedState, feed) => {
   const feedObject = {};
   const channelTitle = normalizeXML(feed.querySelector('channel > title').innerHTML);
   feedObject.channelTitle = channelTitle;
@@ -24,7 +34,7 @@ const parseFeed = (watchedState, feed) => {
     const link = item.querySelector('link').nextSibling.textContent;
     const linkTrimmed = link.trim().slice(0, -2);
     const postDate = item.querySelector('pubdate').innerHTML;
-    const postId = watchedState.postIdCounter;
+    const postId = getPostID(item.querySelector('guid').innerHTML);
     watchedState.postIdCounter += 1;
     return {
       postTitle, description, linkTrimmed, postDate, postId,
@@ -34,4 +44,24 @@ const parseFeed = (watchedState, feed) => {
   return feedObject;
 };
 
-export { parseFeed, parseXML };
+const updateParse = (watchedState, feed) => {
+  const postItems = feed.querySelectorAll('item');
+  const postItemsArray = Array.from(postItems);
+  const posts = postItemsArray
+    .map((item) => {
+      const postTitle = normalizeXML(item.querySelector('title').innerHTML);
+      const description = normalizeXML(item.querySelector('description').innerHTML);
+      const link = item.querySelector('link').nextSibling.textContent;
+      const linkTrimmed = link.trim().slice(0, -2);
+      const postDate = item.querySelector('pubdate').innerHTML;
+      const postId = getPostID(item.querySelector('guid').innerHTML);
+      watchedState.postIdCounter += 1;
+      return {
+        postTitle, description, linkTrimmed, postDate, postId,
+      };
+    })
+    .filter((item) => (!getPostIds(watchedState).includes(item.postId)));
+  return posts;
+};
+
+export { initialParse, updateParse, parseXML };

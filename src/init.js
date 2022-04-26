@@ -10,6 +10,7 @@ export default () => {
     urls: [],
     feeds: [],
     posts: [],
+    newPosts: [],
     feedback: null,
     status: null,
     mode: null,

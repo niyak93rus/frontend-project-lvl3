@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
-import { parseFeed, parseXML } from './parser.js';
+import { initialParse, updateParse, parseXML } from './parser.js';
 
 const loadPosts = (userUrl, watchedState, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
@@ -10,11 +10,12 @@ const loadPosts = (userUrl, watchedState, i18n) => {
     .then((response) => {
       const XML = response.data.contents;
       const feed = parseXML(XML, 'text/html');
-      const parsedFeed = parseFeed(watchedState, feed);
+      const parsedFeed = initialParse(watchedState, feed);
       watchedState.status = 'valid';
       watchedState.feeds.push(parsedFeed);
       watchedState.feedback = i18n.t('successMessage');
       watchedState.mode = 'showFeed';
+      watchedState.mode = 'filling';
     })
     .catch((error) => {
       console.log(error);
@@ -30,33 +31,22 @@ const loadPosts = (userUrl, watchedState, i18n) => {
     });
 };
 
-const getPostIds = (watchedState) => {
-  const allPostIds = watchedState.posts.reduce((all, curr) => {
-    all.push(curr.postId);
-    return all;
-  }, []);
-  return allPostIds;
-};
-
 const updateFeed = (watchedState, i18n) => {
   watchedState.urls.forEach((url) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
     const newUrl = new URL(allOriginsProxy);
     axios.get(newUrl)
       .then((response) => {
+        watchedState.newPosts = [];
         const XML = response.request.response;
         const feed = parseXML(XML, 'text/html');
-        const parsedFeed = parseFeed(watchedState, feed);
-        watchedState.feeds.forEach((stateFeed) => {
-          watchedState.posts.forEach((post) => {
-            if (!getPostIds(watchedState).includes(post.postId)) {
-              if (stateFeed.channelTitle === parsedFeed.channelTitle) {
-                stateFeed.newPosts.push(post);
-                watchedState.mode = 'updateFeed';
-              }
-            }
-          });
-        });
+        const newPosts = updateParse(watchedState, feed);
+        watchedState.newPosts.push(...newPosts);
+        watchedState.posts.push(...newPosts);
+        if (newPosts.length > 0) {
+          watchedState.mode = 'updatingFeed';
+        }
+        watchedState.mode = 'filling';
       })
       .catch((error) => {
         watchedState.mode = 'filling';
@@ -65,7 +55,7 @@ const updateFeed = (watchedState, i18n) => {
         console.log(error);
       });
   });
-  setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
+  setTimeout(updateFeed, watchedState.update.delay, watchedState);
 };
 
 const app = (schema, i18nInstance, watchedState) => {
