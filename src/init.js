@@ -30,7 +30,7 @@ export default () => {
       ru,
     },
   })
-    .then((result) => result)
+    .then()
     .catch((err) => console.log(err));
 
   const watchedState = onChange(state, () => {
