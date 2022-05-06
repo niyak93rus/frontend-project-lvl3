@@ -23,14 +23,14 @@ export default () => {
 
   const i18nInstance = i18next.createInstance();
 
-  i18nInstance.init({
+  const i18n = i18nInstance.init({
     lng: 'ru',
     debug: true,
     resources: {
       ru,
     },
   })
-    .then()
+    .then((result) => result)
     .catch((err) => console.log(err));
 
   const watchedState = onChange(state, () => {
@@ -42,4 +42,5 @@ export default () => {
   });
 
   runApp(schema, i18nInstance, watchedState);
+  return i18n;
 };
