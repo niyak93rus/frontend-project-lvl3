@@ -90,6 +90,37 @@ const clearFeedback = () => {
   }
 };
 
+const showErrorMessage = (state, input, feedback, column) => {
+  clearFeedback();
+  input.classList.add('is-invalid');
+  feedback.innerHTML = state.feedback;
+  feedback.classList.add('text-danger');
+  column.append(feedback);
+};
+
+const showSuccessMessage = (state, input, feedback, column) => {
+  clearFeedback();
+  input.value = '';
+  input.focus();
+  input.classList.remove('is-invalid');
+  input.classList.add('is-valid');
+  feedback.innerHTML = state.feedback;
+  feedback.classList.add('text-success');
+  column.append(feedback);
+};
+
+const blockUI = (state, input, feedback, button) => {
+  button.setAttribute('disabled', 'disabled');
+  input.readOnly = true;
+  feedback.innerHTML = state.feedback;
+  feedback.classList.add('text-danger');
+};
+
+const unblockUI = (button, input) => {
+  button.disabled = false;
+  input.readOnly = false;
+};
+
 const render = (state, i18n) => {
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
@@ -107,25 +138,13 @@ const render = (state, i18n) => {
 
   switch (state.mode) {
     case 'showingError':
-      clearFeedback();
-      input.classList.add('is-invalid');
-      feedback.innerHTML = state.feedback;
-      feedback.classList.add('text-danger');
-      column.append(feedback);
+      showErrorMessage(state, input, feedback, column);
       break;
     case 'showingSuccessMessage':
-      clearFeedback();
-      input.value = '';
-      input.focus();
-      input.classList.remove('is-invalid');
-      input.classList.add('is-valid');
-      feedback.innerHTML = state.feedback;
-      feedback.classList.add('text-success');
-      column.append(feedback);
+      showSuccessMessage(state, input, feedback, column);
       break;
     case 'showingFeed':
-      button.disabled = false;
-      input.readOnly = false;
+      unblockUI(button, input);
       if (state.feeds.length > 1) {
         renderNewFeeds(state, i18n);
       } else {
@@ -133,14 +152,10 @@ const render = (state, i18n) => {
       }
       break;
     case 'filling':
-      button.disabled = false;
-      input.readOnly = false;
+      unblockUI(button, input);
       break;
     case 'processing':
-      button.setAttribute('disabled', 'disabled');
-      input.readOnly = true;
-      feedback.innerHTML = state.feedback;
-      feedback.classList.add('text-danger');
+      blockUI(state, input, feedback, button);
       break;
     case 'showingModal':
       markLinkVisited(state);

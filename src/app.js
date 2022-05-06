@@ -12,6 +12,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       const XML = response.data.contents;
       const feed = parseXML(XML, 'text/html');
       const parsedFeed = initialParse(watchedState, feed);
+      watchedState.urls.push(userUrl);
       watchedState.feeds.push(parsedFeed);
       watchedState.posts.push(...watchedState.newPosts);
       watchedState.feedback = i18n.t('successMessage');
@@ -53,26 +54,7 @@ const updateFeed = (watchedState, i18n) => {
   setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
 };
 
-const app = (schema, i18nInstance, watchedState) => {
-  watchedState.mode = 'filling';
-  const urlForm = document.querySelector('form');
-  urlForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(urlForm);
-    const url = data.get('url');
-    schema.validate({ url })
-      .then(() => {
-        watchedState.urls.push(url);
-        loadPosts(url, watchedState, i18nInstance);
-      })
-      .catch((err) => {
-        watchedState.feedback = err.message;
-        watchedState.mode = 'showingError';
-        console.log(err);
-        watchedState.mode = 'filling';
-      });
-    updateFeed(watchedState, i18nInstance);
-  });
+const connectModalToPost = (watchedState) => {
   const postsArea = document.querySelector('.posts');
   postsArea.addEventListener('click', (event) => {
     const targetButton = event.target;
@@ -84,6 +66,28 @@ const app = (schema, i18nInstance, watchedState) => {
       }
     });
   });
+};
+
+const app = (schema, i18nInstance, watchedState) => {
+  watchedState.mode = 'filling';
+  const urlForm = document.querySelector('form');
+  urlForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(urlForm);
+    const url = data.get('url');
+    schema.validate({ url })
+      .then(() => {
+        loadPosts(url, watchedState, i18nInstance);
+      })
+      .catch((err) => {
+        watchedState.feedback = err.message;
+        watchedState.mode = 'showingError';
+        console.log(err);
+        watchedState.mode = 'filling';
+      });
+    updateFeed(watchedState, i18nInstance);
+  });
+  connectModalToPost(watchedState);
 };
 
 export default app;
