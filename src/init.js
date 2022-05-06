@@ -23,7 +23,7 @@ export default () => {
 
   const i18nInstance = i18next.createInstance();
 
-  const i18n = i18nInstance.init({
+  i18nInstance.init({
     lng: 'ru',
     debug: true,
     resources: {
@@ -42,5 +42,4 @@ export default () => {
   });
 
   runApp(schema, i18nInstance, watchedState);
-  return i18n;
 };
