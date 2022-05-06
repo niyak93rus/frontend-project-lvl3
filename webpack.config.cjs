@@ -1,6 +1,5 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-extraneous-dependencies */
-
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -9,13 +8,14 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'public'),
   },
-  devServer: {
-    open: true,
-    host: 'localhost',
-  },
   mode: process.env.NODE_ENV || 'development',
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        enforce: 'pre',
+        use: ['source-map-loader'],
+      },
       { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
       {
         test: /\.scss$/,
