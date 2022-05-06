@@ -13,6 +13,22 @@ const renderModal = (post) => {
   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
 
+const renderPosts = (postList, posts, i18n) => {
+  posts.forEach((post) => {
+    const { postTitle, postId } = post;
+    const link = post.linkTrimmed;
+    const postCard = document.createElement('div');
+    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
+    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
+    data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postCard.querySelector('button').addEventListener('click', () => {
+      renderModal(post);
+    });
+    postList.prepend(postCard);
+  });
+};
+
 const markLinkVisited = (state) => {
   const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
   const neighbourLink = button.parentNode.children[0];
@@ -40,19 +56,7 @@ const renderFeeds = (state, i18n) => {
   });
 
   const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
-  sortedPosts.forEach((post) => {
-    const { postTitle, postId } = post;
-    const link = post.linkTrimmed;
-    const postCard = document.createElement('div');
-    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
-    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
-    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
-    data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    postCard.querySelector('button').addEventListener('click', () => {
-      renderModal(post);
-    });
-    postList.prepend(postCard);
-  });
+  renderPosts(postList, sortedPosts, i18n);
 };
 
 const updateFeed = (button, input, state, i18n) => {
@@ -60,31 +64,22 @@ const updateFeed = (button, input, state, i18n) => {
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
   const updatedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
-  updatedPosts.forEach((post) => {
-    const { postTitle, postId } = post;
-    const link = post.linkTrimmed;
-    const postCard = document.createElement('div');
-    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
-    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
-    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
-    data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    postCard.querySelector('button').addEventListener('click', () => {
-      renderModal(post);
-    });
-    postList.prepend(postCard);
-  });
+  renderPosts(postList, updatedPosts, i18n);
+};
+
+const clearFeedback = () => {
+  const lastMessage = document.querySelector('.feedback');
+  if (lastMessage !== null) {
+    lastMessage.remove();
+  }
 };
 
 const render = (state, i18n) => {
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
-  const lastMessage = document.querySelector('.feedback');
-  if (lastMessage !== null) {
-    lastMessage.remove();
-  }
-
+  const column = document.querySelector('.col-md-10');
   const feedback = document.createElement('p');
-  feedback.classList.add('m-0', 'position-absolute', 'small', 'feedback');
+  feedback.classList.add('m-0', 'small', 'feedback');
 
   const links = document.querySelectorAll('a');
   links.forEach((link) => {
@@ -94,47 +89,47 @@ const render = (state, i18n) => {
     });
   });
 
-  const column = document.querySelector('.col-md-10');
-  if (state.status === 'invalid') {
-    input.classList.add('is-invalid');
-    feedback.textContent = state.feedback;
-    feedback.classList.add('text-danger');
-    column.append(feedback);
-  }
-  if (state.status === 'valid') {
-    input.value = '';
-    input.focus();
-    input.classList.remove('is-invalid');
-    input.classList.add('is-valid');
-    feedback.textContent = state.feedback;
-    feedback.classList.add('text-success');
-    column.append(feedback);
-  }
-
-  if (state.mode === 'showingFeed') {
-    button.disabled = false;
-    input.readOnly = false;
-    renderFeeds(state, i18n);
-  }
-
-  if (state.mode === 'filling') {
-    button.disabled = false;
-    input.readOnly = false;
-  }
-
-  if (state.mode === 'processing') {
-    button.setAttribute('disabled', 'disabled');
-    input.readOnly = true;
-    feedback.textContent = state.feedback;
-    feedback.classList.add('text-danger');
-  }
-
-  if (state.mode === 'showingModal') {
-    markLinkVisited(state);
-  }
-
-  if (state.mode === 'updatingFeed') {
-    updateFeed(button, input, state, i18n);
+  switch (state.mode) {
+    case 'showingError':
+      clearFeedback();
+      input.classList.add('is-invalid');
+      feedback.innerHTML = state.feedback;
+      feedback.classList.add('text-danger');
+      column.append(feedback);
+      break;
+    case 'showingSuccessMessage':
+      clearFeedback();
+      input.value = '';
+      input.focus();
+      input.classList.remove('is-invalid');
+      input.classList.add('is-valid');
+      feedback.innerHTML = state.feedback;
+      feedback.classList.add('text-success');
+      column.append(feedback);
+      break;
+    case 'showingFeed':
+      button.disabled = false;
+      input.readOnly = false;
+      renderFeeds(state, i18n);
+      break;
+    case 'filling':
+      button.disabled = false;
+      input.readOnly = false;
+      break;
+    case 'processing':
+      button.setAttribute('disabled', 'disabled');
+      input.readOnly = true;
+      feedback.innerHTML = state.feedback;
+      feedback.classList.add('text-danger');
+      break;
+    case 'showingModal':
+      markLinkVisited(state);
+      break;
+    case 'updatingFeed':
+      updateFeed(button, input, state, i18n);
+      break;
+    default:
+      throw new Error(`Unexpected state mode: ${state.mode}`);
   }
 };
 

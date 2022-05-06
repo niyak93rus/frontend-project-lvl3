@@ -11,23 +11,17 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       const XML = response.data.contents;
       const feed = parseXML(XML, 'text/html');
       const parsedFeed = initialParse(watchedState, feed);
-      watchedState.status = 'valid';
       watchedState.feeds.push(parsedFeed);
       watchedState.feedback = i18n.t('successMessage');
+      watchedState.mode = 'showingSuccessMessage';
       watchedState.mode = 'showingFeed';
       watchedState.mode = 'filling';
     })
     .catch((error) => {
       console.log(error);
-      if (error.message === 'Network Error') {
-        watchedState.status = 'invalid';
-        watchedState.feedback = i18n.t('networkError');
-        watchedState.mode = 'filling';
-      } else {
-        watchedState.status = 'invalid';
-        watchedState.feedback = i18n.t('invalidRSS');
-        watchedState.mode = 'filling';
-      }
+      watchedState.feedback = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
+      watchedState.mode = 'showingError';
+      watchedState.mode = 'filling';
     });
 };
 
@@ -49,9 +43,8 @@ const updateFeed = (watchedState, i18n) => {
         watchedState.mode = 'filling';
       })
       .catch((error) => {
-        watchedState.mode = 'filling';
-        watchedState.status = 'invalid';
         watchedState.feedback = i18n.t('invalidRSS');
+        watchedState.mode = 'showingError';
         console.log(error);
       });
   });
@@ -71,8 +64,8 @@ const app = (schema, i18nInstance, watchedState) => {
         loadPosts(url, watchedState, i18nInstance);
       })
       .catch((err) => {
-        watchedState.status = 'invalid';
         watchedState.feedback = err.message;
+        watchedState.mode = 'showingError';
         console.log(err);
         watchedState.mode = 'filling';
       });
