@@ -20,6 +20,19 @@ const getPostIds = (watchedState) => {
   return allPostIds;
 };
 
+const mapPosts = (posts, watchedState) => posts.map((item) => {
+  const postTitle = normalizeXML(item.querySelector('title').innerHTML);
+  const description = normalizeXML(item.querySelector('description').innerHTML);
+  const link = item.querySelector('link').nextSibling.textContent;
+  const linkTrimmed = link.trim();
+  const postDate = item.querySelector('pubdate').innerHTML;
+  const postId = getPostID(item.querySelector('guid').innerHTML);
+  watchedState.postIdCounter += 1;
+  return {
+    postTitle, description, linkTrimmed, postDate, postId,
+  };
+});
+
 const initialParse = (watchedState, feed) => {
   const feedObject = {};
   const channelTitle = normalizeXML(feed.querySelector('channel > title').innerHTML);
@@ -28,18 +41,7 @@ const initialParse = (watchedState, feed) => {
   feedObject.channelDescription = channelDescription;
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
-  const posts = postItemsArray.map((item) => {
-    const postTitle = normalizeXML(item.querySelector('title').innerHTML);
-    const description = normalizeXML(item.querySelector('description').innerHTML);
-    const link = item.querySelector('link').nextSibling.textContent;
-    const linkTrimmed = link.trim();
-    const postDate = item.querySelector('pubdate').innerHTML;
-    const postId = getPostID(item.querySelector('guid').innerHTML);
-    watchedState.postIdCounter += 1;
-    return {
-      postTitle, description, linkTrimmed, postDate, postId,
-    };
-  });
+  const posts = mapPosts(postItemsArray);
   watchedState.posts.push(...posts);
   return feedObject;
 };
@@ -47,19 +49,7 @@ const initialParse = (watchedState, feed) => {
 const updateParse = (watchedState, feed) => {
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
-  const posts = postItemsArray
-    .map((item) => {
-      const postTitle = normalizeXML(item.querySelector('title').innerHTML);
-      const description = normalizeXML(item.querySelector('description').innerHTML);
-      const link = item.querySelector('link').nextSibling.textContent;
-      const linkTrimmed = link.trim();
-      const postDate = item.querySelector('pubdate').innerHTML;
-      const postId = getPostID(item.querySelector('guid').innerHTML);
-      watchedState.postIdCounter += 1;
-      return {
-        postTitle, description, linkTrimmed, postDate, postId,
-      };
-    })
+  const posts = mapPosts(postItemsArray)
     .filter((item) => (!getPostIds(watchedState).includes(item.postId)));
   return posts;
 };
