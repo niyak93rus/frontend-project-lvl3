@@ -41,7 +41,7 @@ const initialParse = (watchedState, feed) => {
   feedObject.channelDescription = channelDescription;
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
-  const posts = mapPosts(postItemsArray);
+  const posts = mapPosts(postItemsArray, watchedState);
   watchedState.posts.push(...posts);
   return feedObject;
 };
@@ -49,7 +49,7 @@ const initialParse = (watchedState, feed) => {
 const updateParse = (watchedState, feed) => {
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
-  const posts = mapPosts(postItemsArray)
+  const posts = mapPosts(postItemsArray, watchedState)
     .filter((item) => (!getPostIds(watchedState).includes(item.postId)));
   return posts;
 };
