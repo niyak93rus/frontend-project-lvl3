@@ -36,7 +36,7 @@ const renderPosts = (postList, posts, i18n) => {
   });
 };
 
-const renderFeeds = (state, i18n) => {
+const createHtmlStructure = () => {
   document.querySelector('.feeds').innerHTML = '<h2 class="card-title h4">Фиды</h2>';
   document.querySelector('.posts').innerHTML = '<h2 class="card-title h4">Посты</h2>';
   const feedList = document.createElement('ul');
@@ -45,6 +45,9 @@ const renderFeeds = (state, i18n) => {
   const postList = document.createElement('ul');
   postList.classList.add('post-list', 'list-group', 'card-body', 'border-0');
   document.querySelector('.posts').append(postList);
+};
+
+const pastePosts = (state, feedList, postList, i18n) => {
   state.feeds.forEach((feed) => {
     const { channelTitle } = feed;
     const { channelDescription } = feed;
@@ -58,22 +61,18 @@ const renderFeeds = (state, i18n) => {
   renderPosts(postList, sortedPosts, i18n);
 };
 
+const renderInitialFeeds = (state, i18n) => {
+  createHtmlStructure();
+  const feedList = document.querySelector('.feed-list');
+  const postList = document.querySelector('.post-list');
+  pastePosts(state, feedList, postList, i18n);
+};
+
 const renderNewFeeds = (state, i18n) => {
   const feedList = document.querySelector('.feed-list');
   feedList.innerHTML = '';
   const postList = document.querySelector('.post-list');
-  console.log(state.feeds);
-  state.feeds.forEach((feed) => {
-    const { channelTitle } = feed;
-    const { channelDescription } = feed;
-
-    const feedCard = document.createElement('div');
-    feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
-    feedList.prepend(feedCard);
-  });
-
-  const sortedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
-  renderPosts(postList, sortedPosts, i18n);
+  pastePosts(state, feedList, postList, i18n);
 };
 
 const updateFeed = (button, input, state, i18n) => {
@@ -130,7 +129,7 @@ const render = (state, i18n) => {
       if (state.feeds.length > 1) {
         renderNewFeeds(state, i18n);
       } else {
-        renderFeeds(state, i18n);
+        renderInitialFeeds(state, i18n);
       }
       break;
     case 'filling':
