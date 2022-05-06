@@ -13,6 +13,13 @@ const renderModal = (post) => {
   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
 
+const markLinkVisited = (state) => {
+  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
+  const neighbourLink = button.parentNode.children[0];
+  neighbourLink.classList.replace('fw-bold', 'fw-normal');
+  neighbourLink.classList.add('link-secondary');
+};
+
 const renderPosts = (postList, posts, i18n) => {
   posts.forEach((post) => {
     const { postTitle, postId } = post;
@@ -29,23 +36,15 @@ const renderPosts = (postList, posts, i18n) => {
   });
 };
 
-const markLinkVisited = (state) => {
-  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
-  const neighbourLink = button.parentNode.children[0];
-  neighbourLink.classList.replace('fw-bold', 'fw-normal');
-  neighbourLink.classList.add('link-secondary');
-};
-
 const renderFeeds = (state, i18n) => {
   document.querySelector('.feeds').innerHTML = '<h2 class="card-title h4">Фиды</h2>';
   document.querySelector('.posts').innerHTML = '<h2 class="card-title h4">Посты</h2>';
   const feedList = document.createElement('ul');
-  feedList.classList.add('list-group', 'card', 'border-0');
+  feedList.classList.add('feed-list', 'list-group', 'card', 'border-0');
   document.querySelector('.feeds').append(feedList);
   const postList = document.createElement('ul');
   postList.classList.add('post-list', 'list-group', 'card-body', 'border-0');
   document.querySelector('.posts').append(postList);
-
   state.feeds.forEach((feed) => {
     const { channelTitle } = feed;
     const { channelDescription } = feed;
@@ -55,7 +54,25 @@ const renderFeeds = (state, i18n) => {
     feedList.prepend(feedCard);
   });
 
-  const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  const sortedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
+  renderPosts(postList, sortedPosts, i18n);
+};
+
+const renderNewFeeds = (state, i18n) => {
+  const feedList = document.querySelector('.feed-list');
+  feedList.innerHTML = '';
+  const postList = document.querySelector('.post-list');
+  console.log(state.feeds);
+  state.feeds.forEach((feed) => {
+    const { channelTitle } = feed;
+    const { channelDescription } = feed;
+
+    const feedCard = document.createElement('div');
+    feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
+    feedList.prepend(feedCard);
+  });
+
+  const sortedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
   renderPosts(postList, sortedPosts, i18n);
 };
 
@@ -110,7 +127,11 @@ const render = (state, i18n) => {
     case 'showingFeed':
       button.disabled = false;
       input.readOnly = false;
-      renderFeeds(state, i18n);
+      if (state.feeds.length > 1) {
+        renderNewFeeds(state, i18n);
+      } else {
+        renderFeeds(state, i18n);
+      }
       break;
     case 'filling':
       button.disabled = false;

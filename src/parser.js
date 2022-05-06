@@ -42,7 +42,7 @@ const initialParse = (watchedState, feed) => {
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = mapPosts(postItemsArray, watchedState);
-  watchedState.posts.push(...posts);
+  watchedState.newPosts.push(...posts);
   return feedObject;
 };
 

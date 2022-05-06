@@ -8,10 +8,12 @@ const loadPosts = (userUrl, watchedState, i18n) => {
   watchedState.mode = 'processing';
   axios.get(url)
     .then((response) => {
+      watchedState.newPosts = [];
       const XML = response.data.contents;
       const feed = parseXML(XML, 'text/html');
       const parsedFeed = initialParse(watchedState, feed);
       watchedState.feeds.push(parsedFeed);
+      watchedState.posts.push(...watchedState.newPosts);
       watchedState.feedback = i18n.t('successMessage');
       watchedState.mode = 'showingSuccessMessage';
       watchedState.mode = 'showingFeed';
