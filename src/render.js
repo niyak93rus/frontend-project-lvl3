@@ -14,7 +14,7 @@ const renderModal = (post) => {
 };
 
 const markLinkVisited = (state) => {
-  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
+  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.uiState.relatedPost}"]`);
   const neighbourLink = button.parentNode.children[0];
   neighbourLink.classList.replace('fw-bold', 'fw-normal');
   neighbourLink.classList.add('link-secondary');

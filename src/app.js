@@ -29,6 +29,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
 };
 
 const updateFeed = (watchedState, i18n) => {
+  const DELAY = 5000;
   watchedState.urls.forEach((url) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
     const newUrl = new URL(allOriginsProxy);
@@ -51,7 +52,7 @@ const updateFeed = (watchedState, i18n) => {
         console.log(error);
       });
   });
-  setTimeout(updateFeed, watchedState.update.delay, watchedState, i18n);
+  setTimeout(updateFeed, DELAY, watchedState, i18n);
 };
 
 const connectModalToPost = (watchedState) => {
@@ -61,7 +62,8 @@ const connectModalToPost = (watchedState) => {
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
     watchedState.posts.forEach((post) => {
       if (Number(post.postId) === Number(relatedPostId)) {
-        watchedState.relatedPostId = post.postId;
+        watchedState.uiState.relatedPost = relatedPostId;
+        console.log(watchedState);
         watchedState.mode = 'showingModal';
       }
     });

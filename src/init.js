@@ -8,7 +8,7 @@ import render from './render.js';
 
 export default () => {
   const i18nInstance = i18next.createInstance();
-  i18nInstance.init({
+  return i18nInstance.init({
     lng: 'ru',
     debug: true,
     resources: {
@@ -17,6 +17,9 @@ export default () => {
   })
     .then(() => {
       const state = {
+        uiState: {
+          relatedPost: null,
+        },
         urls: [],
         feeds: [],
         posts: [],
@@ -24,10 +27,6 @@ export default () => {
         feedback: null,
         status: null,
         mode: null,
-        postIdCounter: 0,
-        update: {
-          delay: 5000,
-        },
       };
 
       const watchedState = onChange(state, () => {
