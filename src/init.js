@@ -17,24 +17,44 @@ export default () => {
   })
     .then(() => {
       const state = {
-        uiState: {
-          relatedPost: null,
+        formValidation: {
+          state: null,
+          data: {
+            urls: [],
+          },
         },
-        urls: [],
+        dataLoading: {
+          state: null,
+          data: {
+            newPosts: [],
+          },
+        },
+        uiState: {
+          state: null,
+          data: {
+            relatedPost: null,
+            uiText: null,
+          },
+        },
         feeds: [],
         posts: [],
-        newPosts: [],
-        feedback: null,
-        status: null,
-        mode: null,
       };
 
-      const watchedState = onChange(state, () => {
-        render(state, i18nInstance);
+      const watchedState = onChange(state, (path) => {
+        console.log(path);
+        if (path === 'dataLoading.state') {
+          render(state.dataLoading.state, state, i18nInstance);
+        }
+        if (path === 'uiState.state') {
+          render(state.uiState.state, state, i18nInstance);
+        }
+        if (path === 'formValidation.state') {
+          render(state.formValidation.state, state, i18nInstance);
+        }
       });
 
       const schema = object({
-        url: string().url(i18nInstance.t('validError')).required(i18nInstance.t('emptyError')).notOneOf([watchedState.urls], i18nInstance.t('existsError')),
+        url: string().url(i18nInstance.t('validError')).required(i18nInstance.t('emptyError')).notOneOf([watchedState.formValidation.data.urls], i18nInstance.t('existsError')),
       });
 
       runApp(schema, i18nInstance, watchedState);

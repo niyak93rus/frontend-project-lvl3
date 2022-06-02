@@ -5,50 +5,50 @@ import { initialParse, updateParse, parseXML } from './parser.js';
 const loadPosts = (userUrl, watchedState, i18n) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
   const url = new URL(allOriginsProxy);
-  watchedState.mode = 'processing';
+  watchedState.dataLoading.state = 'processing';
   axios.get(url)
     .then((response) => {
-      watchedState.newPosts = [];
+      watchedState.uiState.data.uiText = i18n.t('successMessage');
+      watchedState.uiState.state = 'showingSuccessMessage';
+      watchedState.dataLoading.data.newPosts = [];
       const XML = response.data.contents;
       const feed = parseXML(XML, 'text/html');
       const parsedFeed = initialParse(watchedState, feed);
-      watchedState.urls.push(userUrl);
+      watchedState.formValidation.data.urls.push(userUrl);
       watchedState.feeds.push(parsedFeed);
-      watchedState.posts.push(...watchedState.newPosts);
-      watchedState.feedback = i18n.t('successMessage');
-      watchedState.mode = 'showingSuccessMessage';
-      watchedState.mode = 'showingFeed';
-      watchedState.mode = 'filling';
+      watchedState.posts.push(...watchedState.dataLoading.data.newPosts);
+      watchedState.uiState.state = 'showingFeed';
+      watchedState.formValidation.state = 'filling';
     })
     .catch((error) => {
       console.log(error);
-      watchedState.feedback = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
-      watchedState.mode = 'showingError';
-      watchedState.mode = 'filling';
+      watchedState.uiState.data.uiText = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
+      watchedState.uiState.state = 'showingError';
+      watchedState.formValidation.state = 'filling';
     });
 };
 
 const updateFeed = (watchedState, i18n) => {
   const DELAY = 5000;
-  watchedState.urls.forEach((url) => {
+  watchedState.formValidation.data.urls.forEach((url) => {
     const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
     const newUrl = new URL(allOriginsProxy);
     axios.get(newUrl)
       .then((response) => {
-        watchedState.newPosts = [];
+        watchedState.dataLoading.data.newPosts = [];
         const XML = response.request.response;
         const feed = parseXML(XML, 'text/html');
         const newPosts = updateParse(watchedState, feed);
-        watchedState.newPosts.push(...newPosts);
+        watchedState.dataLoading.data.newPosts.push(...newPosts);
         watchedState.posts.push(...newPosts);
         if (newPosts.length > 0) {
-          watchedState.mode = 'updatingFeed';
+          watchedState.dataLoading.state = 'updatingFeed';
         }
-        watchedState.mode = 'filling';
+        // watchedState.formValidation.state = 'filling';
       })
       .catch((error) => {
-        watchedState.feedback = i18n.t('invalidRSS');
-        watchedState.mode = 'showingError';
+        watchedState.uiState.data.uiText = i18n.t('invalidRSS');
+        watchedState.uiState.state = 'showingError';
         console.log(error);
       });
   });
@@ -62,16 +62,15 @@ const connectModalToPost = (watchedState) => {
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
     watchedState.posts.forEach((post) => {
       if (Number(post.postId) === Number(relatedPostId)) {
-        watchedState.uiState.relatedPost = relatedPostId;
-        console.log(watchedState);
-        watchedState.mode = 'showingModal';
+        watchedState.relatedPostId = post.postId;
+        watchedState.uiState.state = 'showingModal';
       }
     });
   });
 };
 
 const app = (schema, i18nInstance, watchedState) => {
-  watchedState.mode = 'filling';
+  watchedState.formValidation.state = 'filling';
   const urlForm = document.querySelector('form');
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -82,10 +81,10 @@ const app = (schema, i18nInstance, watchedState) => {
         loadPosts(url, watchedState, i18nInstance);
       })
       .catch((err) => {
-        watchedState.feedback = err.message;
-        watchedState.mode = 'showingError';
+        watchedState.uiState.data.uiText = err.message;
+        watchedState.uiState.state = 'showingError';
         console.log(err);
-        watchedState.mode = 'filling';
+        watchedState.formValidation.state = 'filling';
       });
     updateFeed(watchedState, i18nInstance);
   });

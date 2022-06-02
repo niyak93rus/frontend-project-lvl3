@@ -14,7 +14,8 @@ const renderModal = (post) => {
 };
 
 const markLinkVisited = (state) => {
-  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.uiState.relatedPost}"]`);
+  console.log(state);
+  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
   const neighbourLink = button.parentNode.children[0];
   neighbourLink.classList.replace('fw-bold', 'fw-normal');
   neighbourLink.classList.add('link-secondary');
@@ -57,7 +58,7 @@ const pastePosts = (state, feedList, postList, i18n) => {
     feedList.prepend(feedCard);
   });
 
-  const sortedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
+  const sortedPosts = _.sortBy(state.dataLoading.data.newPosts, ['post', 'postDate']);
   renderPosts(postList, sortedPosts, i18n);
 };
 
@@ -79,7 +80,7 @@ const updateFeed = (button, input, state, i18n) => {
   button.disabled = false;
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
-  const updatedPosts = _.sortBy(state.newPosts, ['post', 'postDate']);
+  const updatedPosts = _.sortBy(state.dataLoading.data.newPosts, ['post', 'postDate']);
   renderPosts(postList, updatedPosts, i18n);
 };
 
@@ -93,7 +94,7 @@ const clearFeedback = () => {
 const showErrorMessage = (state, input, feedback, column) => {
   clearFeedback();
   input.classList.add('is-invalid');
-  feedback.innerHTML = state.feedback;
+  feedback.innerHTML = state.uiState.data.uiText;
   feedback.classList.add('text-danger');
   column.append(feedback);
 };
@@ -104,7 +105,7 @@ const showSuccessMessage = (state, input, feedback, column) => {
   input.focus();
   input.classList.remove('is-invalid');
   input.classList.add('is-valid');
-  feedback.innerHTML = state.feedback;
+  feedback.innerHTML = state.uiState.data.uiText;
   feedback.classList.add('text-success');
   column.append(feedback);
 };
@@ -112,7 +113,7 @@ const showSuccessMessage = (state, input, feedback, column) => {
 const blockUI = (state, input, feedback, button) => {
   button.setAttribute('disabled', 'disabled');
   input.readOnly = true;
-  feedback.innerHTML = state.feedback;
+  feedback.innerHTML = state.uiState.data.uiText;
   feedback.classList.add('text-danger');
 };
 
@@ -121,7 +122,8 @@ const unblockUI = (button, input) => {
   input.readOnly = false;
 };
 
-const render = (state, i18n) => {
+const render = (currentState, stateObject, i18n) => {
+  console.log(stateObject);
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
   const column = document.querySelector('.col-md-10');
@@ -136,35 +138,35 @@ const render = (state, i18n) => {
     });
   });
 
-  switch (state.mode) {
+  switch (currentState) {
     case 'showingError':
-      showErrorMessage(state, input, feedback, column);
+      showErrorMessage(stateObject, input, feedback, column);
       break;
     case 'showingSuccessMessage':
-      showSuccessMessage(state, input, feedback, column);
+      showSuccessMessage(stateObject, input, feedback, column);
       break;
     case 'showingFeed':
       unblockUI(button, input);
-      if (state.feeds.length > 1) {
-        renderNewFeeds(state, i18n);
+      if (stateObject.feeds.length > 1) {
+        renderNewFeeds(stateObject, i18n);
       } else {
-        renderInitialFeeds(state, i18n);
+        renderInitialFeeds(stateObject, i18n);
       }
       break;
     case 'filling':
       unblockUI(button, input);
       break;
     case 'processing':
-      blockUI(state, input, feedback, button);
+      blockUI(stateObject, input, feedback, button);
       break;
     case 'showingModal':
-      markLinkVisited(state);
+      markLinkVisited(stateObject);
       break;
     case 'updatingFeed':
-      updateFeed(button, input, state, i18n);
+      updateFeed(button, input, stateObject, i18n);
       break;
     default:
-      throw new Error(`Unexpected state mode: ${state.mode}`);
+      throw new Error(`Unexpected state mode: ${currentState}`);
   }
 };
 
