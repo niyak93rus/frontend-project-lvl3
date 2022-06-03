@@ -14,8 +14,7 @@ const renderModal = (post) => {
 };
 
 const markLinkVisited = (state) => {
-  console.log(state);
-  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.relatedPostId}"]`);
+  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.uiState.data.relatedPostId}"]`);
   const neighbourLink = button.parentNode.children[0];
   neighbourLink.classList.replace('fw-bold', 'fw-normal');
   neighbourLink.classList.add('link-secondary');
@@ -154,6 +153,8 @@ const render = (currentState, stateObject, i18n) => {
       }
       break;
     case 'filling':
+    case 'idle':
+    case 'waiting':
       unblockUI(button, input);
       break;
     case 'processing':

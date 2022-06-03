@@ -18,19 +18,19 @@ export default () => {
     .then(() => {
       const state = {
         formValidation: {
-          state: null,
+          state: 'filling',
           data: {
             urls: [],
           },
         },
         dataLoading: {
-          state: null,
+          state: 'waiting',
           data: {
             newPosts: [],
           },
         },
         uiState: {
-          state: null,
+          state: 'idle',
           data: {
             relatedPost: null,
             uiText: null,
@@ -41,7 +41,6 @@ export default () => {
       };
 
       const watchedState = onChange(state, (path) => {
-        console.log(path);
         if (path === 'dataLoading.state') {
           render(state.dataLoading.state, state, i18nInstance);
         }

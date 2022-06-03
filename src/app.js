@@ -8,6 +8,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
   watchedState.dataLoading.state = 'processing';
   axios.get(url)
     .then((response) => {
+      watchedState.dataLoading.state = 'waiting';
       watchedState.uiState.data.uiText = i18n.t('successMessage');
       watchedState.uiState.state = 'showingSuccessMessage';
       watchedState.dataLoading.data.newPosts = [];
@@ -22,6 +23,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
     })
     .catch((error) => {
       console.log(error);
+      watchedState.dataLoading.state = 'waiting';
       watchedState.uiState.data.uiText = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
       watchedState.uiState.state = 'showingError';
       watchedState.formValidation.state = 'filling';
@@ -39,16 +41,17 @@ const updateFeed = (watchedState, i18n) => {
         const XML = response.request.response;
         const feed = parseXML(XML, 'text/html');
         const newPosts = updateParse(watchedState, feed);
-        watchedState.dataLoading.data.newPosts.push(...newPosts);
-        watchedState.posts.push(...newPosts);
         if (newPosts.length > 0) {
+          watchedState.dataLoading.data.newPosts.push(...newPosts);
+          watchedState.posts.push(...newPosts);
           watchedState.dataLoading.state = 'updatingFeed';
+          watchedState.dataLoading.state = 'waiting';
         }
-        // watchedState.formValidation.state = 'filling';
       })
       .catch((error) => {
         watchedState.uiState.data.uiText = i18n.t('invalidRSS');
         watchedState.uiState.state = 'showingError';
+        watchedState.uiState.state = 'idle';
         console.log(error);
       });
   });
@@ -60,12 +63,9 @@ const connectModalToPost = (watchedState) => {
   postsArea.addEventListener('click', (event) => {
     const targetButton = event.target;
     const relatedPostId = targetButton.getAttribute('data-bs-postId');
-    watchedState.posts.forEach((post) => {
-      if (Number(post.postId) === Number(relatedPostId)) {
-        watchedState.relatedPostId = post.postId;
-        watchedState.uiState.state = 'showingModal';
-      }
-    });
+    watchedState.uiState.data.relatedPostId = relatedPostId;
+    watchedState.uiState.state = 'showingModal';
+    watchedState.uiState.state = 'idle';
   });
 };
 
