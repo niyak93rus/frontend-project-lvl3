@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
+import { normalizeXML } from './renderFeed.js';
 
 const renderModal = (post) => {
   const postModal = document.getElementById('modal');
@@ -23,10 +24,11 @@ const markLinkVisited = (postId) => {
 const renderPosts = (state, postList, posts, i18n) => {
   posts.forEach((post) => {
     const { postTitle, postId } = post;
+    console.log(post);
     const link = post.linkTrimmed;
     const postCard = document.createElement('div');
     postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
-    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
+    <a class="fw-bold" href="${link}" target="_blank">${normalizeXML(postTitle)}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
     if (state.uiState.data.clickedPosts.includes(postId)) {

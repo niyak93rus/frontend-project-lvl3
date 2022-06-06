@@ -2,7 +2,8 @@
 import axios from 'axios';
 import { object, setLocale, string } from 'yup';
 import { has } from 'lodash';
-import { initialParse, updateParse, parseXML } from './parser.js';
+import parseXML from './parser.js';
+import { parseFeed, updateParse } from './renderFeed.js';
 
 const collectUrls = (watchedState) => {
   const urls = [];
@@ -35,11 +36,9 @@ const loadPosts = (userUrl, watchedState, i18n) => {
   axios.get(url)
     .then((response) => {
       const XML = response.data.contents;
-      const feed = parseXML(XML, 'text/html');
-      console.log(feed);
-      const parsedFeed = initialParse(watchedState, feed);
-      console.log(parsedFeed);
-      const feedWithUrl = { ...parsedFeed, userUrl };
+      const XMLDocument = parseXML(XML, 'application/xml');
+      const feed = parseFeed(watchedState, XMLDocument);
+      const feedWithUrl = { ...feed, userUrl };
       watchedState.feeds.push(feedWithUrl);
       watchedState.uiState.data.uiText = i18n.t('successMessage');
       watchedState.dataLoading.state = 'successful';
@@ -59,9 +58,9 @@ const updateFeed = (watchedState, i18n) => {
     const newUrl = new URL(allOriginsProxy);
     axios.get(newUrl)
       .then((response) => {
-        const XML = response.request.response;
-        const feed = parseXML(XML, 'text/html');
-        const newPosts = updateParse(watchedState, feed);
+        const XML = response.data.contents;
+        const XMLDocument = parseXML(XML, 'application/xml');
+        const newPosts = updateParse(watchedState, XMLDocument);
         if (newPosts.length > 0) {
           watchedState.posts.push(...newPosts);
           watchedState.dataLoading.state = 'updatingFeed';
