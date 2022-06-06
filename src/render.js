@@ -13,14 +13,14 @@ const renderModal = (post) => {
   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
 
-const markLinkVisited = (state) => {
-  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${state.uiState.data.relatedPostId}"]`);
+const markLinkVisited = (postId) => {
+  const button = document.querySelector('.posts').querySelector(`[data-bs-postId="${postId}"]`);
   const neighbourLink = button.parentNode.children[0];
   neighbourLink.classList.replace('fw-bold', 'fw-normal');
   neighbourLink.classList.add('link-secondary');
 };
 
-const renderPosts = (postList, posts, i18n) => {
+const renderPosts = (state, postList, posts, i18n) => {
   posts.forEach((post) => {
     const { postTitle, postId } = post;
     const link = post.linkTrimmed;
@@ -29,6 +29,10 @@ const renderPosts = (postList, posts, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    if (state.uiState.data.clickedPosts.includes(postId)) {
+      postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
+      postCard.querySelector('a').classList.add('link-secondary');
+    }
     postCard.querySelector('button').addEventListener('click', () => {
       renderModal(post);
     });
@@ -57,8 +61,8 @@ const pastePosts = (state, feedList, postList, i18n) => {
     feedList.prepend(feedCard);
   });
 
-  const sortedPosts = _.sortBy(state.dataLoading.data.newPosts, ['post', 'postDate']);
-  renderPosts(postList, sortedPosts, i18n);
+  const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  renderPosts(state, postList, sortedPosts, i18n);
 };
 
 const renderInitialFeeds = (state, i18n) => {
@@ -72,15 +76,17 @@ const renderNewFeeds = (state, i18n) => {
   const feedList = document.querySelector('.feed-list');
   feedList.innerHTML = '';
   const postList = document.querySelector('.post-list');
+  postList.innerHTML = '';
   pastePosts(state, feedList, postList, i18n);
 };
 
-const updateFeed = (button, input, state, i18n) => {
+const renderUpdatedFeed = (button, input, state, i18n) => {
   button.disabled = false;
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
-  const updatedPosts = _.sortBy(state.dataLoading.data.newPosts, ['post', 'postDate']);
-  renderPosts(postList, updatedPosts, i18n);
+  postList.innerHTML = '';
+  const updatedPosts = _.sortBy(state.posts, ['post', 'postDate']);
+  renderPosts(state, postList, updatedPosts, i18n);
 };
 
 const clearFeedback = () => {
@@ -90,10 +96,15 @@ const clearFeedback = () => {
   }
 };
 
-const showErrorMessage = (state, input, feedback, column) => {
+const showErrorMessage = (state, input, feedback, column, process) => {
   clearFeedback();
+  if (process === 'validation') {
+    feedback.innerHTML = state.formValidation.error;
+  }
+  if (process === 'loading') {
+    feedback.innerHTML = state.dataLoading.error;
+  }
   input.classList.add('is-invalid');
-  feedback.innerHTML = state.uiState.data.uiText;
   feedback.classList.add('text-danger');
   column.append(feedback);
 };
@@ -121,8 +132,7 @@ const unblockUI = (button, input) => {
   input.readOnly = false;
 };
 
-const render = (currentState, stateObject, i18n) => {
-  console.log(stateObject);
+const render = (state, path, i18n) => {
   const input = document.querySelector('input');
   const button = document.querySelector('[aria-label="add"]');
   const column = document.querySelector('.col-md-10');
@@ -137,37 +147,53 @@ const render = (currentState, stateObject, i18n) => {
     });
   });
 
-  switch (currentState) {
-    case 'showingError':
-      showErrorMessage(stateObject, input, feedback, column);
-      break;
-    case 'showingSuccessMessage':
-      showSuccessMessage(stateObject, input, feedback, column);
-      break;
-    case 'showingFeed':
-      unblockUI(button, input);
-      if (stateObject.feeds.length > 1) {
-        renderNewFeeds(stateObject, i18n);
-      } else {
-        renderInitialFeeds(stateObject, i18n);
-      }
-      break;
-    case 'filling':
-    case 'idle':
-    case 'waiting':
-      unblockUI(button, input);
-      break;
-    case 'processing':
-      blockUI(stateObject, input, feedback, button);
-      break;
-    case 'showingModal':
-      markLinkVisited(stateObject);
-      break;
-    case 'updatingFeed':
-      updateFeed(button, input, stateObject, i18n);
-      break;
-    default:
-      throw new Error(`Unexpected state mode: ${currentState}`);
+  let currentState;
+  if (path === 'formValidation.state') {
+    currentState = state.formValidation.state;
+    switch (currentState) {
+      case 'valid':
+        clearFeedback();
+        break;
+      case 'invalid':
+        showErrorMessage(state, input, feedback, column, 'validation');
+        break;
+      case 'empty':
+        unblockUI(button, input);
+        break;
+      default:
+        throw new Error(`Unexpected state mode: ${currentState}`);
+    }
+  }
+  if (path === 'dataLoading.state') {
+    currentState = state.dataLoading.state;
+    switch (currentState) {
+      case 'failed':
+        showErrorMessage(state, input, feedback, column, 'loading');
+        break;
+      case 'successful':
+        showSuccessMessage(state, input, feedback, column);
+        unblockUI(button, input);
+        if (state.feeds.length > 1) {
+          renderNewFeeds(state, i18n);
+        } else {
+          renderInitialFeeds(state, i18n);
+        }
+        break;
+      case 'waiting':
+        unblockUI(button, input);
+        break;
+      case 'processing':
+        blockUI(state, input, feedback, button);
+        break;
+      case 'updatingFeed':
+        renderUpdatedFeed(button, input, state, i18n);
+        break;
+      default:
+        throw new Error(`Unexpected state mode: ${currentState}`);
+    }
+  }
+  if (path === 'uiState.data.clickedPosts') {
+    markLinkVisited(_.last(state.uiState.data.clickedPosts));
   }
 };
 

@@ -25,7 +25,7 @@ const mapPosts = (posts) => posts.map((item) => {
   const description = normalizeXML(item.querySelector('description').innerHTML);
   const link = item.querySelector('link').nextSibling.textContent;
   const linkTrimmed = link.trim();
-  const postDate = item.querySelector('pubdate').innerHTML;
+  const postDate = new Date(item.querySelector('pubdate').innerHTML).getTime();
   const postId = getPostID(item.querySelector('guid').innerHTML);
   return {
     postTitle, description, linkTrimmed, postDate, postId,
@@ -41,7 +41,7 @@ const initialParse = (watchedState, feed) => {
   const postItems = feed.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = mapPosts(postItemsArray, watchedState);
-  watchedState.dataLoading.data.newPosts.push(...posts);
+  watchedState.posts.push(...posts);
   return feedObject;
 };
 
