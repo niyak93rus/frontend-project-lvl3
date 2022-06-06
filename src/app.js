@@ -20,6 +20,10 @@ const validateForm = (watchedState, url, i18n) => {
     string: {
       url: `${i18n.t('validError')}`,
       required: `${i18n.t('emptyError')}`,
+      invalidRSS: `${i18n.t('invalidRSS')}`,
+      validationError: `${i18n.t('existsError')}`,
+    },
+    mixed: {
       notOneOf: `${i18n.t('existsError')}`,
     },
   });
