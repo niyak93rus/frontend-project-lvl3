@@ -54,7 +54,7 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       state.dataLoading.state = 'successful';
     })
     .catch((error) => {
-      state.dataLoading.error = i18n.t('invalidRSS');
+      state.dataLoading.error = error.name === 'NetworkError' ? i18n.t('networkError') : i18n.t('invalidRSS');
       state.dataLoading.state = 'failed';
       console.log(error);
       state.dataLoading.state = 'waiting';
