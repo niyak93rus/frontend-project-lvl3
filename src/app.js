@@ -26,7 +26,7 @@ const validateForm = (watchedState, url, i18n) => {
     string: {
       url: `${i18n.t('validError')}`,
       required: `${i18n.t('emptyError')}`,
-      invalidRSS: `${i18n.t('invalidRSS')}`,
+      notOneOf: `${i18n.t('existsError')}`,
     },
     mixed: {
       notOneOf: `${i18n.t('existsError')}`,
@@ -42,13 +42,11 @@ const validateForm = (watchedState, url, i18n) => {
 const loadPosts = (userUrl, watchedState, i18n) => {
   const state = watchedState;
   state.dataLoading.state = 'processing';
-  const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(userUrl)}`;
-  const url = new URL(allOriginsProxy);
+  const url = new URL(addProxy(userUrl));
   axios.get(url)
     .then((response) => {
       const XML = response.data.contents;
       const data = parse(XML, 'application/xml');
-      console.log(data);
       const feed = parseFeed(watchedState, data);
       const feedWithUrl = { ...feed, userUrl };
       state.feeds.push(feedWithUrl);
@@ -56,37 +54,37 @@ const loadPosts = (userUrl, watchedState, i18n) => {
       state.dataLoading.state = 'successful';
     })
     .catch((error) => {
-      state.dataLoading.error = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
+      state.dataLoading.error = i18n.t('invalidRSS');
       state.dataLoading.state = 'failed';
       console.log(error);
       state.dataLoading.state = 'waiting';
     });
 };
 
-// const updateFeed = (watchedState, i18n) => {
-//   const state = watchedState;
-//   const urls = collectUrls(watchedState);
-//   urls.forEach((url) => {
-//     const newUrl = new URL(addProxy(url));
-//     axios.get(newUrl)
-//       .then((response) => {
-//         const XML = response.data.contents;
-//         const data = parse(XML, 'application/xml');
-//         const newPosts = updateParse(state, data);
-//         if (newPosts.length > 0) {
-//           state.posts.push(...newPosts);
-//           state.dataLoading.state = 'updatingFeed';
-//           state.dataLoading.state = 'waiting';
-//         }
-//       })
-//       .catch((error) => {
-//         state.dataLoading.error = i18n.t('invalidRSS');
-//         state.dataLoading.state = 'failed';
-//         console.log(error);
-//       });
-//   });
-//   setTimeout(updateFeed, DELAY, state, urls, i18n);
-// };
+const updateFeed = (watchedState, i18n) => {
+  const state = watchedState;
+  const urls = collectUrls(watchedState);
+  urls.forEach((url) => {
+    const newUrl = new URL(addProxy(url));
+    axios.get(newUrl)
+      .then((response) => {
+        const XML = response.data.contents;
+        const data = parse(XML, 'application/xml');
+        const newPosts = updateParse(state, data);
+        if (newPosts.length > 0) {
+          state.posts.push(...newPosts);
+          state.dataLoading.state = 'updatingFeed';
+          state.dataLoading.state = 'waiting';
+        }
+      })
+      .catch((error) => {
+        state.dataLoading.error = i18n.t('invalidRSS');
+        state.dataLoading.state = 'failed';
+        console.log(error);
+      });
+  });
+  setTimeout(updateFeed, DELAY, state, i18n);
+};
 
 const runApp = (i18nInstance, watchedState) => {
   const state = watchedState;
@@ -105,7 +103,7 @@ const runApp = (i18nInstance, watchedState) => {
         state.formValidation.state = 'invalid';
         console.log(err);
       });
-    // updateFeed(state, i18nInstance);
+    updateFeed(state, i18nInstance);
   });
   const postsArea = document.querySelector('.posts');
   postsArea.addEventListener('click', (event) => {

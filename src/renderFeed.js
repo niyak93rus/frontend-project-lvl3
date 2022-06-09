@@ -27,21 +27,16 @@ const mapPosts = (posts) => posts.map((item) => {
 });
 
 const parseFeed = (watchedState, feed) => {
-  const feedObject = {};
-  const channelTitle = feed.querySelector('channel > title').textContent;
-  const channelDescription = feed.querySelector('channel > description').textContent;
-  feedObject.channelTitle = channelTitle;
-  feedObject.channelDescription = channelDescription;
-  const postItems = feed.querySelectorAll('item');
-  const postItemsArray = Array.from(postItems);
+  const channelTitle = feed.title.textContent;
+  const channelDescription = feed.description.textContent;
+  const postItemsArray = Array.from(feed.items);
   const posts = mapPosts(postItemsArray, watchedState);
   watchedState.posts.push(...posts);
-  return { channelTitle, channelDescription, posts };
+  return { channelTitle, channelDescription };
 };
 
 const updateParse = (watchedState, feed) => {
-  const postItems = feed.querySelectorAll('item');
-  const postItemsArray = Array.from(postItems);
+  const postItemsArray = Array.from(feed.items);
   const posts = mapPosts(postItemsArray, watchedState)
     .filter((item) => (!getPostIds(watchedState).includes(item.postId)));
   return posts;
