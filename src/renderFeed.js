@@ -17,7 +17,7 @@ const getPostIds = (watchedState) => {
 const mapPosts = (posts) => posts.map((item) => {
   const postTitle = item.querySelector('title').textContent;
   const description = item.querySelector('description').textContent;
-  const link = item.querySelector('link').nextSibling.textContent;
+  const link = item.querySelector('link').textContent;
   const linkTrimmed = link.trim();
   const postDate = item.querySelector('pubDate').textContent;
   const postId = getPostID(item.querySelector('guid').textContent);

@@ -26,7 +26,7 @@ export default () => {
         },
         uiState: {
           data: {
-            clickedPosts: [],
+            clickedPosts: new Set(),
             uiText: null,
           },
         },

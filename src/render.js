@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import _ from 'lodash';
 import { normalizeXML } from './renderFeed.js';
 
@@ -24,14 +23,13 @@ const markLinkVisited = (postId) => {
 const renderPosts = (state, postList, posts, i18n) => {
   posts.forEach((post) => {
     const { postTitle, postId } = post;
-    console.log(post);
     const link = post.linkTrimmed;
     const postCard = document.createElement('div');
     postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
     <a class="fw-bold" href="${link}" target="_blank">${normalizeXML(postTitle)}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    if (state.uiState.data.clickedPosts.includes(postId)) {
+    if (state.uiState.data.clickedPosts.has(postId)) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
       postCard.querySelector('a').classList.add('link-secondary');
     }
@@ -82,7 +80,8 @@ const renderNewFeeds = (state, i18n) => {
   pastePosts(state, feedList, postList, i18n);
 };
 
-const renderUpdatedFeed = (button, input, state, i18n) => {
+const renderUpdatedFeed = (elements, state, i18n) => {
+  const { button, input } = elements;
   button.disabled = false;
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
@@ -98,8 +97,9 @@ const clearFeedback = () => {
   }
 };
 
-const showErrorMessage = (state, input, feedback, column, process) => {
+const showErrorMessage = (state, elements, process) => {
   clearFeedback();
+  const { column, input, feedback } = elements;
   if (process === 'validation') {
     feedback.innerHTML = state.formValidation.error;
   }
@@ -111,7 +111,8 @@ const showErrorMessage = (state, input, feedback, column, process) => {
   column.append(feedback);
 };
 
-const showSuccessMessage = (state, input, feedback, column) => {
+const showSuccessMessage = (state, elements) => {
+  const { column, feedback, input } = elements;
   clearFeedback();
   input.value = '';
   input.focus();
@@ -122,14 +123,16 @@ const showSuccessMessage = (state, input, feedback, column) => {
   column.append(feedback);
 };
 
-const blockUI = (state, input, feedback, button) => {
+const blockUI = (state, elements) => {
+  const { input, feedback, button } = elements;
   button.setAttribute('disabled', 'disabled');
   input.readOnly = true;
   feedback.innerHTML = state.uiState.data.uiText;
   feedback.classList.add('text-danger');
 };
 
-const unblockUI = (button, input) => {
+const unblockUI = (elements) => {
+  const { button, input } = elements;
   button.disabled = false;
   input.readOnly = false;
 };
@@ -139,15 +142,15 @@ const render = (state, path, i18n) => {
   const button = document.querySelector('[aria-label="add"]');
   const column = document.querySelector('.col-md-10');
   const feedback = document.createElement('p');
-  feedback.classList.add('m-0', 'small', 'feedback');
 
-  const links = document.querySelectorAll('a');
-  links.forEach((link) => {
-    link.addEventListener(('click'), () => {
-      link.classList.replace('fw-bold', 'fw-normal');
-      link.classList.add('link-secondary');
-    });
-  });
+  const elements = {
+    button,
+    input,
+    column,
+    feedback,
+  };
+
+  feedback.classList.add('m-0', 'small', 'feedback');
 
   let currentState;
   if (path === 'formValidation.state') {
@@ -157,10 +160,10 @@ const render = (state, path, i18n) => {
         clearFeedback();
         break;
       case 'invalid':
-        showErrorMessage(state, input, feedback, column, 'validation');
+        showErrorMessage(state, elements, 'validation');
         break;
       case 'empty':
-        unblockUI(button, input);
+        unblockUI(elements);
         break;
       default:
         throw new Error(`Unexpected state mode: ${currentState}`);
@@ -170,11 +173,11 @@ const render = (state, path, i18n) => {
     currentState = state.dataLoading.state;
     switch (currentState) {
       case 'failed':
-        showErrorMessage(state, input, feedback, column, 'loading');
+        showErrorMessage(state, elements, 'loading');
         break;
       case 'successful':
-        showSuccessMessage(state, input, feedback, column);
-        unblockUI(button, input);
+        showSuccessMessage(state, elements);
+        unblockUI(elements);
         if (state.feeds.length > 1) {
           renderNewFeeds(state, i18n);
         } else {
@@ -182,20 +185,21 @@ const render = (state, path, i18n) => {
         }
         break;
       case 'waiting':
-        unblockUI(button, input);
+        unblockUI(elements);
         break;
       case 'processing':
-        blockUI(state, input, feedback, button);
+        blockUI(state, elements);
         break;
       case 'updatingFeed':
-        renderUpdatedFeed(button, input, state, i18n);
+        renderUpdatedFeed(elements, state, i18n);
         break;
       default:
         throw new Error(`Unexpected state mode: ${currentState}`);
     }
   }
   if (path === 'uiState.data.clickedPosts') {
-    markLinkVisited(_.last(state.uiState.data.clickedPosts));
+    const clickedPosts = Array.from(state.uiState.data.clickedPosts);
+    markLinkVisited(_.last(clickedPosts));
   }
 };
 
