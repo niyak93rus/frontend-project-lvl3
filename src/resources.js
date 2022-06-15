@@ -1,3 +1,16 @@
+import { setLocale } from 'yup';
+
+setLocale({
+  string: {
+    url: 'validError',
+    required: 'emptyError',
+    notOneOf: 'existsError',
+  },
+  mixed: {
+    notOneOf: 'existsError',
+  },
+});
+
 const resources = {
   translation: {
     emptyError: 'Не должно быть пустым',

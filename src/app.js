@@ -1,40 +1,20 @@
 import axios from 'axios';
-import { object, setLocale, string } from 'yup';
-import { has } from 'lodash';
-import parse from './parser.js';
-import { parseFeed, updateParse } from './renderFeed.js';
+import { object, string } from 'yup';
+import parse, { updateParse } from './parser.js';
 
 const DELAY = 5000;
 
-const collectUrls = (watchedState) => {
-  const urls = [];
-  watchedState.feeds.forEach((feed) => {
-    if (has(feed, 'userUrl')) {
-      urls.push(feed.userUrl);
-    }
-  });
-  return urls;
-};
+const collectUrls = (state) => state.feeds.map((feed) => feed.url);
 
 const addProxy = (url) => {
   const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
   return allOriginsProxy;
 };
 
-const validateForm = (watchedState, url, i18n) => {
-  setLocale({
-    string: {
-      url: `${i18n.t('validError')}`,
-      required: `${i18n.t('emptyError')}`,
-      notOneOf: `${i18n.t('existsError')}`,
-    },
-    mixed: {
-      notOneOf: `${i18n.t('existsError')}`,
-    },
-  });
-
+const validateForm = (state, url) => {
+  const previousURLs = collectUrls(state);
   const schema = object({
-    url: string().url().required().notOneOf([collectUrls(watchedState)]),
+    url: string().url().required().notOneOf(previousURLs),
   });
   return schema.validate({ url });
 };
@@ -46,12 +26,11 @@ const loadPosts = (userUrl, watchedState, i18n) => {
   axios.get(url)
     .then((response) => {
       const XML = response.data.contents;
-      const data = parse(XML, 'application/xml');
-      const feed = parseFeed(watchedState, data);
-      const feedWithUrl = { ...feed, userUrl };
-      state.feeds.push(feedWithUrl);
+      const feed = parse(state, XML, 'application/xml');
+      state.feeds.push({ ...feed, url: userUrl });
       state.uiState.data.uiText = i18n.t('successMessage');
       state.dataLoading.state = 'successful';
+      console.log(state.posts);
     })
     .catch((error) => {
       state.dataLoading.error = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
@@ -63,14 +42,14 @@ const loadPosts = (userUrl, watchedState, i18n) => {
 
 const updateFeed = (watchedState, i18n) => {
   const state = watchedState;
-  const urls = collectUrls(watchedState);
+  const urls = collectUrls(state);
   urls.forEach((url) => {
     const newUrl = new URL(addProxy(url));
     axios.get(newUrl)
       .then((response) => {
         const XML = response.data.contents;
-        const data = parse(XML, 'application/xml');
-        const newPosts = updateParse(state, data);
+        parse(state, XML, 'application/xml');
+        const newPosts = updateParse(state);
         if (newPosts.length > 0) {
           state.posts.push(...newPosts);
           state.dataLoading.state = 'updatingFeed';
@@ -99,7 +78,7 @@ const runApp = (i18nInstance, watchedState) => {
         loadPosts(url, state, i18nInstance);
       })
       .catch((err) => {
-        state.formValidation.error = err.message;
+        state.formValidation.error = `${i18nInstance.t(err.message)}`;
         state.formValidation.state = 'invalid';
         console.log(err);
       });

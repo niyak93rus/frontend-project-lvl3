@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { normalizeXML } from './renderFeed.js';
 
 const renderModal = (post) => {
   const postModal = document.getElementById('modal');
@@ -26,7 +25,7 @@ const renderPosts = (state, postList, posts, i18n) => {
     const link = post.linkTrimmed;
     const postCard = document.createElement('div');
     postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
-    <a class="fw-bold" href="${link}" target="_blank">${normalizeXML(postTitle)}</a>
+    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
     if (state.uiState.data.clickedPosts.has(postId)) {
@@ -53,11 +52,11 @@ const createHtmlStructure = () => {
 
 const pastePosts = (state, feedList, postList, i18n) => {
   state.feeds.forEach((feed) => {
-    const { channelTitle } = feed;
-    const { channelDescription } = feed;
+    const { title } = feed;
+    const { description } = feed;
 
     const feedCard = document.createElement('div');
-    feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${channelTitle}</h3><p>${channelDescription}</p></li>`;
+    feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${title}</h3><p>${description}</p></li>`;
     feedList.prepend(feedCard);
   });
 
@@ -73,6 +72,7 @@ const renderInitialFeeds = (state, i18n) => {
 };
 
 const renderNewFeeds = (state, i18n) => {
+  debugger;
   const feedList = document.querySelector('.feed-list');
   feedList.innerHTML = '';
   const postList = document.querySelector('.post-list');
@@ -142,6 +142,7 @@ const render = (state, path, i18n) => {
   const button = document.querySelector('[aria-label="add"]');
   const column = document.querySelector('.col-md-10');
   const feedback = document.createElement('p');
+  feedback.classList.add('m-0', 'small', 'feedback');
 
   const elements = {
     button,
@@ -149,8 +150,6 @@ const render = (state, path, i18n) => {
     column,
     feedback,
   };
-
-  feedback.classList.add('m-0', 'small', 'feedback');
 
   let currentState;
   if (path === 'formValidation.state') {
