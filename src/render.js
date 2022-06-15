@@ -28,7 +28,7 @@ const renderPosts = (state, postList, posts, i18n) => {
     <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
-    if (state.uiState.data.clickedPosts.has(postId)) {
+    if (state.uiState.seenPosts.has(postId)) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
       postCard.querySelector('a').classList.add('link-secondary');
     }
@@ -72,7 +72,6 @@ const renderInitialFeeds = (state, i18n) => {
 };
 
 const renderNewFeeds = (state, i18n) => {
-  debugger;
   const feedList = document.querySelector('.feed-list');
   feedList.innerHTML = '';
   const postList = document.querySelector('.post-list');
@@ -97,37 +96,36 @@ const clearFeedback = () => {
   }
 };
 
-const showErrorMessage = (state, elements, process) => {
+const showErrorMessage = (state, elements, process, i18n) => {
   clearFeedback();
   const { column, input, feedback } = elements;
   if (process === 'validation') {
-    feedback.innerHTML = state.formValidation.error;
+    feedback.innerHTML = i18n.t(state.formValidation.error);
   }
   if (process === 'loading') {
-    feedback.innerHTML = state.dataLoading.error;
+    feedback.innerHTML = (state.dataLoading.error === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
   }
   input.classList.add('is-invalid');
   feedback.classList.add('text-danger');
   column.append(feedback);
 };
 
-const showSuccessMessage = (state, elements) => {
+const showSuccessMessage = (elements, i18n) => {
   const { column, feedback, input } = elements;
   clearFeedback();
   input.value = '';
   input.focus();
   input.classList.remove('is-invalid');
   input.classList.add('is-valid');
-  feedback.innerHTML = state.uiState.data.uiText;
+  feedback.innerHTML = i18n.t('successMessage');
   feedback.classList.add('text-success');
   column.append(feedback);
 };
 
-const blockUI = (state, elements) => {
+const blockUI = (elements) => {
   const { input, feedback, button } = elements;
   button.setAttribute('disabled', 'disabled');
   input.readOnly = true;
-  feedback.innerHTML = state.uiState.data.uiText;
   feedback.classList.add('text-danger');
 };
 
@@ -159,7 +157,7 @@ const render = (state, path, i18n) => {
         clearFeedback();
         break;
       case 'invalid':
-        showErrorMessage(state, elements, 'validation');
+        showErrorMessage(state, elements, 'validation', i18n);
         break;
       case 'empty':
         unblockUI(elements);
@@ -172,10 +170,10 @@ const render = (state, path, i18n) => {
     currentState = state.dataLoading.state;
     switch (currentState) {
       case 'failed':
-        showErrorMessage(state, elements, 'loading');
+        showErrorMessage(state, elements, 'loading', i18n);
         break;
       case 'successful':
-        showSuccessMessage(state, elements);
+        showSuccessMessage(elements, i18n);
         unblockUI(elements);
         if (state.feeds.length > 1) {
           renderNewFeeds(state, i18n);
@@ -187,7 +185,7 @@ const render = (state, path, i18n) => {
         unblockUI(elements);
         break;
       case 'processing':
-        blockUI(state, elements);
+        blockUI(elements);
         break;
       case 'updatingFeed':
         renderUpdatedFeed(elements, state, i18n);
@@ -196,9 +194,9 @@ const render = (state, path, i18n) => {
         throw new Error(`Unexpected state mode: ${currentState}`);
     }
   }
-  if (path === 'uiState.data.clickedPosts') {
-    const clickedPosts = Array.from(state.uiState.data.clickedPosts);
-    markLinkVisited(_.last(clickedPosts));
+  if (path === 'uiState.seenPosts') {
+    const seenPosts = Array.from(state.uiState.seenPosts);
+    markLinkVisited(_.last(seenPosts));
   }
 };
 

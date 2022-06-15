@@ -14,7 +14,7 @@ const mapPosts = (posts) => posts.map((item) => {
   };
 });
 
-const updateParse = (state) => state.posts
+const updateParse = (state, updatedFeed) => updatedFeed.posts
   .filter((post) => !getAllIds(state).includes(post.postId));
 
 export default (state, data, formatName) => {
@@ -31,9 +31,8 @@ export default (state, data, formatName) => {
   const postItems = channel.querySelectorAll('item');
   const postItemsArray = Array.from(postItems);
   const posts = mapPosts(postItemsArray, state);
-  state.posts.push(...posts);
 
-  return { title, description };
+  return { title, description, posts };
 };
 
 export { updateParse };

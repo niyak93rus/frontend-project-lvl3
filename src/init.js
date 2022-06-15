@@ -25,10 +25,7 @@ export default () => {
           error: null,
         },
         uiState: {
-          data: {
-            clickedPosts: new Set(),
-            uiText: null,
-          },
+          seenPosts: new Set(),
         },
         feeds: [],
         posts: [],

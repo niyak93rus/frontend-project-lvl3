@@ -6,10 +6,7 @@ const DELAY = 5000;
 
 const collectUrls = (state) => state.feeds.map((feed) => feed.url);
 
-const addProxy = (url) => {
-  const allOriginsProxy = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
-  return allOriginsProxy;
-};
+const addProxy = (url) => new URL(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
 
 const validateForm = (state, url) => {
   const previousURLs = collectUrls(state);
@@ -19,21 +16,20 @@ const validateForm = (state, url) => {
   return schema.validate({ url });
 };
 
-const loadPosts = (userUrl, watchedState, i18n) => {
+const loadPosts = (userUrl, watchedState) => {
   const state = watchedState;
   state.dataLoading.state = 'processing';
-  const url = new URL(addProxy(userUrl));
+  const url = addProxy(userUrl);
   axios.get(url)
     .then((response) => {
       const XML = response.data.contents;
       const feed = parse(state, XML, 'application/xml');
       state.feeds.push({ ...feed, url: userUrl });
-      state.uiState.data.uiText = i18n.t('successMessage');
+      state.posts.push(...feed.posts);
       state.dataLoading.state = 'successful';
-      console.log(state.posts);
     })
     .catch((error) => {
-      state.dataLoading.error = (error.message === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
+      state.dataLoading.error = error.message;
       state.dataLoading.state = 'failed';
       console.log(error);
       state.dataLoading.state = 'waiting';
@@ -48,8 +44,8 @@ const updateFeed = (watchedState, i18n) => {
     axios.get(newUrl)
       .then((response) => {
         const XML = response.data.contents;
-        parse(state, XML, 'application/xml');
-        const newPosts = updateParse(state);
+        const updatedFeed = parse(state, XML, 'application/xml');
+        const newPosts = updateParse(state, updatedFeed);
         if (newPosts.length > 0) {
           state.posts.push(...newPosts);
           state.dataLoading.state = 'updatingFeed';
@@ -57,7 +53,7 @@ const updateFeed = (watchedState, i18n) => {
         }
       })
       .catch((error) => {
-        state.dataLoading.error = i18n.t('invalidRSS');
+        state.dataLoading.error = error.message;
         state.dataLoading.state = 'failed';
         console.log(error);
       });
@@ -78,7 +74,7 @@ const runApp = (i18nInstance, watchedState) => {
         loadPosts(url, state, i18nInstance);
       })
       .catch((err) => {
-        state.formValidation.error = `${i18nInstance.t(err.message)}`;
+        state.formValidation.error = err.message;
         state.formValidation.state = 'invalid';
         console.log(err);
       });
@@ -89,7 +85,7 @@ const runApp = (i18nInstance, watchedState) => {
     const postButton = event.target.closest('li').querySelector('button');
     const postId = postButton.dataset.bsPostid;
     if (!postId) return;
-    state.uiState.data.clickedPosts.add(postId);
+    state.uiState.seenPosts.add(postId);
   });
 };
 
