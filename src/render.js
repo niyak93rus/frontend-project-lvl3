@@ -97,6 +97,7 @@ const clearFeedback = () => {
 };
 
 const showErrorMessage = (state, elements, process, i18n) => {
+  console.log(state);
   clearFeedback();
   const { column, input, feedback } = elements;
   if (process === 'validation') {
@@ -135,64 +136,67 @@ const unblockUI = (elements) => {
   input.readOnly = false;
 };
 
-const render = (state, path, i18n) => {
-  const input = document.querySelector('input');
-  const button = document.querySelector('[aria-label="add"]');
-  const column = document.querySelector('.col-md-10');
-  const feedback = document.createElement('p');
-  feedback.classList.add('m-0', 'small', 'feedback');
+const renderFormValidation = (state, currentState, elements, i18n) => {
+  switch (currentState) {
+    case 'valid':
+      clearFeedback();
+      break;
+    case 'invalid':
+      showErrorMessage(state, elements, 'validation', i18n);
+      break;
+    case 'empty':
+      unblockUI(elements);
+      break;
+    default:
+      throw new Error(`Unexpected state: ${currentState}`);
+  }
+};
 
+const renderDataLoading = (state, currentState, elements, i18n) => {
+  switch (currentState) {
+    case 'failed':
+      showErrorMessage(state, elements, 'loading', i18n);
+      break;
+    case 'successful':
+      showSuccessMessage(elements, i18n);
+      unblockUI(elements);
+      if (state.feeds.length > 1) {
+        renderNewFeeds(state, i18n);
+      } else {
+        renderInitialFeeds(state, i18n);
+      }
+      break;
+    case 'waiting':
+      unblockUI(elements);
+      break;
+    case 'processing':
+      blockUI(elements);
+      break;
+    case 'updatingFeed':
+      renderUpdatedFeed(elements, state, i18n);
+      break;
+    default:
+      throw new Error(`Unexpected state mode: ${currentState}`);
+  }
+};
+
+const render = (state, path, i18n) => {
   const elements = {
-    button,
-    input,
-    column,
-    feedback,
+    button: document.querySelector('[aria-label="add"]'),
+    input: document.querySelector('input'),
+    column: document.querySelector('.col-md-10'),
+    feedback: document.createElement('p'),
   };
+  elements.feedback.classList.add('m-0', 'small', 'feedback');
 
   let currentState;
   if (path === 'formValidation.state') {
     currentState = state.formValidation.state;
-    switch (currentState) {
-      case 'valid':
-        clearFeedback();
-        break;
-      case 'invalid':
-        showErrorMessage(state, elements, 'validation', i18n);
-        break;
-      case 'empty':
-        unblockUI(elements);
-        break;
-      default:
-        throw new Error(`Unexpected state mode: ${currentState}`);
-    }
+    renderFormValidation(state, currentState, elements, i18n);
   }
   if (path === 'dataLoading.state') {
     currentState = state.dataLoading.state;
-    switch (currentState) {
-      case 'failed':
-        showErrorMessage(state, elements, 'loading', i18n);
-        break;
-      case 'successful':
-        showSuccessMessage(elements, i18n);
-        unblockUI(elements);
-        if (state.feeds.length > 1) {
-          renderNewFeeds(state, i18n);
-        } else {
-          renderInitialFeeds(state, i18n);
-        }
-        break;
-      case 'waiting':
-        unblockUI(elements);
-        break;
-      case 'processing':
-        blockUI(elements);
-        break;
-      case 'updatingFeed':
-        renderUpdatedFeed(elements, state, i18n);
-        break;
-      default:
-        throw new Error(`Unexpected state mode: ${currentState}`);
-    }
+    renderDataLoading(state, currentState, elements, i18n);
   }
   if (path === 'uiState.seenPosts') {
     const seenPosts = Array.from(state.uiState.seenPosts);
