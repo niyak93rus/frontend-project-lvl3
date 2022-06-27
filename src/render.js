@@ -97,7 +97,6 @@ const clearFeedback = () => {
 };
 
 const showErrorMessage = (state, elements, process, i18n) => {
-  console.log(state);
   clearFeedback();
   const { column, input, feedback } = elements;
   if (process === 'validation') {
@@ -142,9 +141,10 @@ const renderFormValidation = (state, currentState, elements, i18n) => {
       clearFeedback();
       break;
     case 'invalid':
+      clearFeedback();
       showErrorMessage(state, elements, 'validation', i18n);
       break;
-    case 'empty':
+    case 'waiting':
       unblockUI(elements);
       break;
     default:
@@ -180,13 +180,7 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
   }
 };
 
-const render = (state, path, i18n) => {
-  const elements = {
-    button: document.querySelector('[aria-label="add"]'),
-    input: document.querySelector('input'),
-    column: document.querySelector('.col-md-10'),
-    feedback: document.createElement('p'),
-  };
+const render = (state, path, i18n, elements) => {
   elements.feedback.classList.add('m-0', 'small', 'feedback');
 
   let currentState;

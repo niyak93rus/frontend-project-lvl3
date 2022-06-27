@@ -27,6 +27,7 @@ const loadPosts = (userUrl, watchedState) => {
       state.feeds.push({ ...feed, url: userUrl });
       state.posts.push(...feed.posts);
       state.dataLoading.state = 'successful';
+      state.dataLoading.error = '';
     })
     .catch((error) => {
       state.dataLoading.error = error.message;
@@ -61,32 +62,4 @@ const updateFeed = (watchedState, i18n) => {
   setTimeout(updateFeed, DELAY, state, i18n);
 };
 
-const runApp = (i18nInstance, watchedState) => {
-  const state = watchedState;
-  const urlForm = document.querySelector('form');
-  urlForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(urlForm);
-    const url = data.get('url');
-    validateForm(watchedState, url, i18nInstance)
-      .then(() => {
-        state.formValidation.state = 'valid';
-        loadPosts(url, state, i18nInstance);
-      })
-      .catch((err) => {
-        state.formValidation.error = err.message;
-        state.formValidation.state = 'invalid';
-        console.log(err);
-      });
-    updateFeed(state, i18nInstance);
-  });
-  const postsArea = document.querySelector('.posts');
-  postsArea.addEventListener('click', (event) => {
-    const postButton = event.target.closest('li').querySelector('button');
-    const postId = postButton.dataset.bsPostid;
-    if (!postId) return;
-    state.uiState.seenPosts.add(postId);
-  });
-};
-
-export default runApp;
+export { validateForm, loadPosts, updateFeed };
