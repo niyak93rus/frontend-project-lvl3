@@ -5,9 +5,9 @@ const renderModal = (post) => {
   const modalTitle = postModal.querySelector('.modal-title');
   const modalBody = postModal.querySelector('.modal-body');
   const modalFooter = postModal.querySelector('.modal-footer');
-  modalTitle.innerHTML = post.postTitle;
+  modalTitle.innerHTML = post.title;
   modalBody.innerHTML = post.description;
-  modalFooter.innerHTML = `<a href="${post.linkTrimmed}"
+  modalFooter.innerHTML = `<a href="${post.link}"
   role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
 };
@@ -21,11 +21,10 @@ const markLinkVisited = (postId) => {
 
 const renderPosts = (state, postList, posts, i18n) => {
   posts.forEach((post) => {
-    const { postTitle, postId } = post;
-    const link = post.linkTrimmed;
+    const { title, postId, link } = post;
     const postCard = document.createElement('div');
     postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
-    <a class="fw-bold" href="${link}" target="_blank">${postTitle}</a>
+    <a class="fw-bold" data-bs-postId="${postId}" href="${link}" target="_blank">${title}</a>
     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
     data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
     if (state.uiState.seenPosts.has(postId)) {
@@ -52,16 +51,13 @@ const createHtmlStructure = () => {
 
 const pastePosts = (state, feedList, postList, i18n) => {
   state.feeds.forEach((feed) => {
-    const { title } = feed;
-    const { description } = feed;
-
+    const { title, description } = feed;
     const feedCard = document.createElement('div');
     feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${title}</h3><p>${description}</p></li>`;
     feedList.prepend(feedCard);
   });
 
-  const sortedPosts = _.sortBy(state.posts, ['post', 'postDate']);
-  renderPosts(state, postList, sortedPosts, i18n);
+  renderPosts(state, postList, state.posts, i18n);
 };
 
 const renderInitialFeeds = (state, i18n) => {
@@ -85,8 +81,7 @@ const renderUpdatedFeed = (elements, state, i18n) => {
   input.readOnly = false;
   const postList = document.querySelector('.post-list');
   postList.innerHTML = '';
-  const updatedPosts = _.sortBy(state.posts, ['post', 'postDate']);
-  renderPosts(state, postList, updatedPosts, i18n);
+  renderPosts(state, postList, state.posts, i18n);
 };
 
 const clearFeedback = () => {
@@ -105,7 +100,9 @@ const showErrorMessage = (state, elements, process, i18n) => {
   if (process === 'loading') {
     feedback.innerHTML = (state.dataLoading.error === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
   }
+  input.classList.remove('is-valid');
   input.classList.add('is-invalid');
+  feedback.classList.remove('text-success');
   feedback.classList.add('text-danger');
   column.append(feedback);
 };
@@ -118,15 +115,15 @@ const showSuccessMessage = (elements, i18n) => {
   input.classList.remove('is-invalid');
   input.classList.add('is-valid');
   feedback.innerHTML = i18n.t('successMessage');
+  feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
   column.append(feedback);
 };
 
 const blockUI = (elements) => {
-  const { input, feedback, button } = elements;
+  const { input, button } = elements;
   button.setAttribute('disabled', 'disabled');
   input.readOnly = true;
-  feedback.classList.add('text-danger');
 };
 
 const unblockUI = (elements) => {
@@ -191,6 +188,9 @@ const render = (state, path, i18n, elements) => {
   if (path === 'dataLoading.state') {
     currentState = state.dataLoading.state;
     renderDataLoading(state, currentState, elements, i18n);
+  }
+  if (path === 'updatingFeed.state') {
+    renderUpdatedFeed(elements, state, i18n);
   }
   if (path === 'uiState.seenPosts') {
     const seenPosts = Array.from(state.uiState.seenPosts);

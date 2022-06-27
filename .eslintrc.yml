@@ -6,8 +6,6 @@ plugins:
   - babel
 
 env:
-  node: true
-  jest: true
   browser: true
 
 extends:

@@ -2,32 +2,41 @@
 import 'bootstrap';
 import i18next from 'i18next';
 import onChange from 'on-change';
+import { object, string } from 'yup';
 import ru from './resources.js';
-import { validateForm, loadPosts, updateFeed } from './app.js';
+import { loadPosts, updateFeed } from './app.js';
 import render from './render.js';
 
-const runApp = (i18nInstance, state, elements) => {
+const validateForm = (state, url) => {
+  const previousURLs = state.feeds.map((feed) => feed.url);
+  const schema = object({
+    url: string().url().required().notOneOf(previousURLs),
+  });
+  return schema.validate({ url });
+};
+
+const runApp = (state, elements) => {
   const { urlForm, postsArea } = elements;
   urlForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(urlForm);
     const url = data.get('url');
-    validateForm(url, i18nInstance)
+    validateForm(state, url)
       .then(() => {
         state.formValidation.state = 'valid';
-        loadPosts(url, state, i18nInstance);
+        loadPosts(url, state);
       })
-      .catch((err) => {
-        state.formValidation.error = err.message;
+      .catch((error) => {
+        state.formValidation.error = error.message;
         state.formValidation.state = 'invalid';
-        console.log(err);
+        console.log(error);
         state.formValidation.state = 'waiting';
       });
-    updateFeed(state, i18nInstance);
+    updateFeed(state);
   });
 
   postsArea.addEventListener('click', (event) => {
-    const postButton = event.target.closest('li').querySelector('button');
+    const postButton = event.target;
     const postId = postButton.dataset.bsPostid;
     if (!postId) return;
     state.uiState.seenPosts.add(postId);
@@ -35,8 +44,8 @@ const runApp = (i18nInstance, state, elements) => {
 };
 
 export default () => {
-  const i18nInstance = i18next.createInstance();
-  return i18nInstance.init({
+  const i18n = i18next.createInstance();
+  return i18n.init({
     lng: 'ru',
     debug: true,
     resources: {
@@ -52,6 +61,9 @@ export default () => {
         dataLoading: {
           state: 'processing', // successful / failed
           error: null,
+        },
+        updatingFeed: {
+          state: 'waiting', // updating
         },
         uiState: {
           seenPosts: new Set(),
@@ -70,10 +82,10 @@ export default () => {
       };
 
       const watchedState = onChange(state, (path) => {
-        render(state, path, i18nInstance, elements);
+        render(state, path, i18n, elements);
       });
 
-      runApp(i18nInstance, watchedState, elements);
+      runApp(watchedState, elements);
     })
-    .catch((err) => console.log(err));
+    .catch((error) => console.log(error));
 };

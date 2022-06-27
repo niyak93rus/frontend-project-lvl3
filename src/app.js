@@ -1,31 +1,23 @@
+/* eslint-disable no-param-reassign */
 import axios from 'axios';
-import { object, string } from 'yup';
-import parse, { updateParse } from './parser.js';
+import { uniqueId } from 'lodash';
+import parse from './parser.js';
 
 const DELAY = 5000;
 
-const collectUrls = (state) => state.feeds.map((feed) => feed.url);
-
 const addProxy = (url) => new URL(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
 
-const validateForm = (state, url) => {
-  const previousURLs = collectUrls(state);
-  const schema = object({
-    url: string().url().required().notOneOf(previousURLs),
-  });
-  return schema.validate({ url });
-};
-
-const loadPosts = (userUrl, watchedState) => {
-  const state = watchedState;
+const loadPosts = (userUrl, state) => {
   state.dataLoading.state = 'processing';
   const url = addProxy(userUrl);
   axios.get(url)
     .then((response) => {
       const XML = response.data.contents;
-      const feed = parse(state, XML, 'application/xml');
+      const feed = parse(XML, 'application/xml');
+      console.log(feed);
       state.feeds.push({ ...feed, url: userUrl });
-      state.posts.push(...feed.posts);
+      const posts = feed.items.map((post) => ({ ...post, postId: uniqueId() }));
+      state.posts.push(...posts);
       state.dataLoading.state = 'successful';
       state.dataLoading.error = '';
     })
@@ -37,29 +29,26 @@ const loadPosts = (userUrl, watchedState) => {
     });
 };
 
-const updateFeed = (watchedState, i18n) => {
-  const state = watchedState;
-  const urls = collectUrls(state);
-  urls.forEach((url) => {
-    const newUrl = new URL(addProxy(url));
-    axios.get(newUrl)
+const updateFeed = (state) => {
+  const feeds = state.feeds.map((feed) => {
+    const url = addProxy(feed.url);
+    return axios.get(url)
       .then((response) => {
         const XML = response.data.contents;
-        const updatedFeed = parse(state, XML, 'application/xml');
-        const newPosts = updateParse(state, updatedFeed);
+        const updatedFeed = parse(XML, 'application/xml');
+        const newPosts = updatedFeed.items
+          .filter((post) => !state.posts.map((item) => item.link).includes(post.link));
         if (newPosts.length > 0) {
-          state.posts.push(...newPosts);
-          state.dataLoading.state = 'updatingFeed';
-          state.dataLoading.state = 'waiting';
+          state.posts.push(...newPosts.map((post) => ({ ...post, postId: uniqueId() })));
+          state.updatingFeed.state = 'updating';
         }
+        state.updatingFeed.state = 'waiting';
       })
       .catch((error) => {
-        state.dataLoading.error = error.message;
-        state.dataLoading.state = 'failed';
         console.log(error);
       });
   });
-  setTimeout(updateFeed, DELAY, state, i18n);
+  Promise.all(feeds).finally(setTimeout(updateFeed, DELAY, state));
 };
 
-export { validateForm, loadPosts, updateFeed };
+export { loadPosts, updateFeed };
