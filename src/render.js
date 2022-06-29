@@ -32,6 +32,7 @@ const renderPosts = (state, postList, posts, i18n) => {
       postCard.querySelector('a').classList.add('link-secondary');
     }
     postCard.querySelector('button').addEventListener('click', () => {
+      console.log(post);
       renderModal(post);
     });
     postList.prepend(postCard);

@@ -14,7 +14,6 @@ const loadPosts = (userUrl, state) => {
     .then((response) => {
       const XML = response.data.contents;
       const feed = parse(XML, 'application/xml');
-      console.log(feed);
       state.feeds.push({ ...feed, url: userUrl });
       const posts = feed.items.map((post) => ({ ...post, postId: uniqueId() }));
       state.posts.push(...posts);
