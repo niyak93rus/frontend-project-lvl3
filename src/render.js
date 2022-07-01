@@ -20,7 +20,7 @@ const markLinkVisited = (postId) => {
 };
 
 const renderPosts = (state, postList, posts, i18n) => {
-  posts.forEach((post) => {
+  _.sortBy(posts, 'title').forEach((post) => {
     const { title, postId, link } = post;
     const postCard = document.createElement('div');
     postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
@@ -32,10 +32,11 @@ const renderPosts = (state, postList, posts, i18n) => {
       postCard.querySelector('a').classList.add('link-secondary');
     }
     postCard.querySelector('button').addEventListener('click', () => {
-      console.log(post);
+      console.log('rendering modal');
       renderModal(post);
     });
     postList.prepend(postCard);
+    console.log(_.sortBy(posts, 'title'));
   });
 };
 
