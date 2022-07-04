@@ -20,6 +20,7 @@ const resources = {
     invalidRSS: 'Ресурс не содержит валидный RSS',
     networkError: 'Ошибка сети',
     buttonTextShow: 'Просмотр',
+    loading: 'Идет загрузка',
   },
 };
 

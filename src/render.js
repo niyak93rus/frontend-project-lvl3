@@ -5,11 +5,25 @@ const renderModal = (post) => {
   const modalTitle = postModal.querySelector('.modal-title');
   const modalBody = postModal.querySelector('.modal-body');
   const modalFooter = postModal.querySelector('.modal-footer');
-  modalTitle.innerHTML = post.title;
-  modalBody.innerHTML = post.description;
-  modalFooter.innerHTML = `<a href="${post.link}"
-  role="button" class="btn btn-primary full-article" target="_blank">Читать полностью</a>
-  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>`;
+
+  modalTitle.textContent = post.title;
+  modalBody.textContent = post.description;
+  modalFooter.innerHTML = '';
+
+  const footerLink = document.createElement('a');
+  footerLink.ariaRoleDescription = 'button';
+  footerLink.classList.add('btn', 'btn-primary', 'full-article');
+  footerLink.href = post.link;
+  footerLink.target = '_blank';
+  footerLink.textContent = 'Читать полностью';
+
+  const footerButton = document.createElement('button');
+  footerButton.classList.add('btn', 'btn-secondary');
+  footerButton.dataset.bsDismiss = 'modal';
+  footerButton.textContent = 'Закрыть';
+  footerButton.type = 'button';
+
+  modalFooter.append(footerLink, footerButton);
 };
 
 const markLinkVisited = (postId) => {
@@ -19,65 +33,107 @@ const markLinkVisited = (postId) => {
   neighbourLink.classList.add('link-secondary');
 };
 
-const renderPosts = (state, postList, posts, i18n) => {
+const renderPosts = (state, postsArea, posts, i18n) => {
   _.sortBy(posts, 'title').forEach((post) => {
     const { title, postId, link } = post;
+
     const postCard = document.createElement('div');
-    postCard.innerHTML = `<li class="list-group-item d-flex justify-content-between align-items-start post-card border-0 border-end-0"'>
-    <a class="fw-bold" data-bs-postId="${postId}" href="${link}" target="_blank">${title}</a>
-    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-postId="${postId}"
-    data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonTextShow')}</button></li>`;
+    postCard.innerHTML = '';
+
+    const postsListItem = document.createElement('li');
+    postsListItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'post-card', 'border-0', 'border-end-0');
+
+    const postLink = document.createElement('a');
+    postLink.classList.add('fw-bold');
+    postLink.dataset.bsPostid = postId;
+    postLink.href = link;
+    postLink.target = '_blank';
+    postLink.textContent = title;
+
+    const postButton = document.createElement('button');
+    postButton.type = 'button';
+    postButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    postButton.dataset.bsPostid = postId;
+    postButton.dataset.bsToggle = 'modal';
+    postButton.dataset.bsTarget = '#modal';
+    postButton.textContent = `${i18n.t('buttonTextShow')}`;
+
+    postsListItem.append(postLink, postButton);
+    postCard.append(postsListItem);
+
     if (state.uiState.seenPosts.has(postId)) {
       postCard.querySelector('a').classList.replace('fw-bold', 'fw-normal');
       postCard.querySelector('a').classList.add('link-secondary');
     }
+
     postCard.querySelector('button').addEventListener('click', () => {
-      console.log('rendering modal');
       renderModal(post);
     });
-    postList.prepend(postCard);
-    console.log(_.sortBy(posts, 'title'));
+
+    postsArea.prepend(postCard);
   });
 };
 
 const createHtmlStructure = () => {
-  document.querySelector('.feeds').innerHTML = '<h2 class="card-title h4">Фиды</h2>';
-  document.querySelector('.posts').innerHTML = '<h2 class="card-title h4">Посты</h2>';
-  const feedList = document.createElement('ul');
-  feedList.classList.add('feed-list', 'list-group', 'card', 'border-0');
-  document.querySelector('.feeds').append(feedList);
+  const feedsArea = document.querySelector('.feeds');
+  const postsArea = document.querySelector('.posts');
+  const feedsAreaHeader = document.createElement('h2');
+  feedsAreaHeader.classList.add('card-title', 'h4');
+  feedsAreaHeader.textContent = 'Фиды';
+
+  const postsAreaHeader = document.createElement('h2');
+  postsAreaHeader.classList.add('card-title', 'h4');
+  postsAreaHeader.textContent = 'Посты';
+
+  const feedsList = document.createElement('ul');
+  feedsList.classList.add('feed-list', 'list-group', 'card', 'border-0');
+
   const postList = document.createElement('ul');
   postList.classList.add('post-list', 'list-group', 'card-body', 'border-0');
-  document.querySelector('.posts').append(postList);
+
+  feedsArea.append(feedsAreaHeader);
+  feedsArea.append(feedsList);
+
+  postsArea.append(postsAreaHeader);
+  postsArea.append(postList);
 };
 
-const pastePosts = (state, feedList, postList, i18n) => {
+const pastePosts = (state, i18n) => {
+  const postsList = document.querySelector('.post-list');
   state.feeds.forEach((feed) => {
     const { title, description } = feed;
     const feedCard = document.createElement('div');
-    feedCard.innerHTML = `<li class="list-group-item feed-card border-0"><h3>${title}</h3><p>${description}</p></li>`;
-    feedList.prepend(feedCard);
+
+    const feedsListItem = document.createElement('li');
+    feedsListItem.classList.add('list-group-item', 'feed-card', 'border-0');
+
+    const feedTitle = document.createElement('h3');
+    feedTitle.textContent = `${title}`;
+
+    const feedDescription = document.createElement('p');
+    feedDescription.textContent = description;
+
+    feedsListItem.append(feedTitle, feedDescription);
+    feedCard.append(feedsListItem);
+    document.querySelector('.feed-list').prepend(feedCard);
   });
 
-  renderPosts(state, postList, state.posts, i18n);
+  renderPosts(state, postsList, state.posts, i18n);
 };
 
 const renderInitialFeeds = (state, i18n) => {
   createHtmlStructure();
-  const feedList = document.querySelector('.feed-list');
-  const postList = document.querySelector('.post-list');
-  pastePosts(state, feedList, postList, i18n);
+  pastePosts(state, i18n);
 };
 
-const renderNewFeeds = (state, i18n) => {
-  const feedList = document.querySelector('.feed-list');
-  feedList.innerHTML = '';
-  const postList = document.querySelector('.post-list');
-  postList.innerHTML = '';
-  pastePosts(state, feedList, postList, i18n);
+const renderNewFeeds = (state, elements, i18n) => {
+  const { feedsArea, postsArea } = elements;
+  feedsArea.innerHTML = '';
+  postsArea.innerHTML = '';
+  pastePosts(state, elements, i18n);
 };
 
-const renderUpdatedFeed = (elements, state, i18n) => {
+export const renderUpdatedFeed = (elements, state, i18n) => {
   const { button, input } = elements;
   button.disabled = false;
   input.readOnly = false;
@@ -170,6 +226,7 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
       break;
     case 'processing':
       blockUI(elements);
+      elements.feedback.innerHTML = i18n.t('loading');
       break;
     case 'updatingFeed':
       renderUpdatedFeed(elements, state, i18n);
@@ -190,9 +247,6 @@ const render = (state, path, i18n, elements) => {
   if (path === 'dataLoading.state') {
     currentState = state.dataLoading.state;
     renderDataLoading(state, currentState, elements, i18n);
-  }
-  if (path === 'updatingFeed.state') {
-    renderUpdatedFeed(elements, state, i18n);
   }
   if (path === 'uiState.seenPosts') {
     const seenPosts = Array.from(state.uiState.seenPosts);
