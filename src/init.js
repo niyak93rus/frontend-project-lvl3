@@ -38,7 +38,6 @@ const loadPosts = (userUrl, state) => {
       const posts = feed.items.map((post) => ({ ...post, postId: uniqueId() }));
       state.posts.push(...posts);
       state.dataLoading.state = 'successful';
-      state.dataLoading.error = '';
       state.dataLoading.state = 'waiting';
     })
     .catch((error) => {

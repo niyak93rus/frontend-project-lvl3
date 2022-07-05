@@ -209,7 +209,15 @@ const renderFormValidation = (state, currentState, elements, i18n) => {
 };
 
 const renderDataLoading = (state, currentState, elements, i18n) => {
+  const { column, feedback } = elements;
   switch (currentState) {
+    case 'processing':
+      feedback.textContent = i18n.t('loading');
+      feedback.remove('text-success', 'text-danger');
+      feedback.classList.add('text-warning');
+      column.append(feedback);
+      blockUI(elements);
+      break;
     case 'failed':
       showErrorMessage(state, elements, 'loading', i18n);
       break;
@@ -220,12 +228,6 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
       break;
     case 'waiting':
       unblockUI(elements);
-      break;
-    case 'processing':
-      blockUI(elements);
-      elements.feedback.innerHTML = i18n.t('loading');
-      elements.feedback.classList.remove('text-success', 'text-danger');
-      elements.feedback.classList.add('text-warning');
       break;
     default:
       throw new Error(`Unexpected state mode: ${currentState}`);
