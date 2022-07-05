@@ -157,12 +157,11 @@ const showErrorMessage = (state, elements, process, i18n) => {
     feedback.innerHTML = i18n.t(state.formValidation.error);
   }
   if (process === 'loading') {
-    console.log(state.dataLoading.error);
     feedback.innerHTML = i18n.t(`${state.dataLoading.error}`);
   }
   input.classList.remove('is-valid');
   input.classList.add('is-invalid');
-  feedback.classList.remove('text-success');
+  feedback.classList.remove('text-success', 'text-warning');
   feedback.classList.add('text-danger');
   column.append(feedback);
 };
@@ -175,7 +174,7 @@ const showSuccessMessage = (elements, i18n) => {
   input.classList.remove('is-invalid');
   input.classList.add('is-valid');
   feedback.innerHTML = i18n.t('successMessage');
-  feedback.classList.remove('text-danger');
+  feedback.classList.remove('text-danger', 'text-warning');
   feedback.classList.add('text-success');
   column.append(feedback);
 };
@@ -225,9 +224,8 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
     case 'processing':
       blockUI(elements);
       elements.feedback.innerHTML = i18n.t('loading');
-      break;
-    case 'updatingFeed':
-      renderUpdatedFeed(elements, state, i18n);
+      elements.feedback.classList.remove('text-success', 'text-danger');
+      elements.feedback.classList.add('text-warning');
       break;
     default:
       throw new Error(`Unexpected state mode: ${currentState}`);

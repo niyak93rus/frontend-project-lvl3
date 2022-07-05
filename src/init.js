@@ -39,6 +39,7 @@ const loadPosts = (userUrl, state) => {
       state.posts.push(...posts);
       state.dataLoading.state = 'successful';
       state.dataLoading.error = '';
+      state.dataLoading.state = 'waiting';
     })
     .catch((error) => {
       state.dataLoading.error = axios.isAxiosError(error) ? 'networkError' : 'invalidRSS';
@@ -114,11 +115,11 @@ export default () => {
     .then(() => {
       const state = {
         formValidation: {
-          state: 'waiting', // valid / invalid
+          state: 'waiting',
           error: null,
         },
         dataLoading: {
-          state: 'processing', // successful / failed
+          state: 'processing',
           error: null,
         },
         uiState: {
