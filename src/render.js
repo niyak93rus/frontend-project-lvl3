@@ -121,19 +121,20 @@ const pastePosts = (state, i18n) => {
   renderPosts(state, postsList, state.posts, i18n);
 };
 
-const renderInitialFeeds = (state, i18n) => {
-  createHtmlStructure();
-  pastePosts(state, i18n);
+const renderFeeds = (state, i18n) => {
+  const feedList = document.querySelector('.feeds');
+  const postList = document.querySelector('.posts');
+  feedList.innerHTML = '';
+  postList.innerHTML = '';
+  if (state.feeds > 1) {
+    pastePosts(state, i18n);
+  } else {
+    createHtmlStructure();
+    pastePosts(state, i18n);
+  }
 };
 
-const renderNewFeeds = (state, elements, i18n) => {
-  const { feedsArea, postsArea } = elements;
-  feedsArea.innerHTML = '';
-  postsArea.innerHTML = '';
-  pastePosts(state, elements, i18n);
-};
-
-export const renderUpdatedFeed = (elements, state, i18n) => {
+const renderUpdatedFeed = (elements, state, i18n) => {
   const { button, input } = elements;
   button.disabled = false;
   input.readOnly = false;
@@ -156,7 +157,8 @@ const showErrorMessage = (state, elements, process, i18n) => {
     feedback.innerHTML = i18n.t(state.formValidation.error);
   }
   if (process === 'loading') {
-    feedback.innerHTML = (state.dataLoading.error === 'Network Error') ? i18n.t('networkError') : i18n.t('invalidRSS');
+    console.log(state.dataLoading.error);
+    feedback.innerHTML = i18n.t(`${state.dataLoading.error}`);
   }
   input.classList.remove('is-valid');
   input.classList.add('is-invalid');
@@ -215,11 +217,7 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
     case 'successful':
       showSuccessMessage(elements, i18n);
       unblockUI(elements);
-      if (state.feeds.length > 1) {
-        renderNewFeeds(state, i18n);
-      } else {
-        renderInitialFeeds(state, i18n);
-      }
+      renderFeeds(state, i18n);
       break;
     case 'waiting':
       unblockUI(elements);
@@ -237,20 +235,33 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
 };
 
 const render = (state, path, i18n, elements) => {
-  elements.feedback.classList.add('m-0', 'small', 'feedback');
+  const { feedback } = elements;
+  feedback.classList.add('m-0', 'small', 'feedback');
 
   let currentState;
-  if (path === 'formValidation.state') {
-    currentState = state.formValidation.state;
-    renderFormValidation(state, currentState, elements, i18n);
-  }
-  if (path === 'dataLoading.state') {
-    currentState = state.dataLoading.state;
-    renderDataLoading(state, currentState, elements, i18n);
-  }
-  if (path === 'uiState.seenPosts') {
-    const seenPosts = Array.from(state.uiState.seenPosts);
-    markLinkVisited(_.last(seenPosts));
+  const seenPosts = Array.from(state.uiState.seenPosts);
+
+  switch (path) {
+    case 'formValidation.state':
+    case 'formValidation.error':
+      currentState = state.formValidation.state;
+      renderFormValidation(state, currentState, elements, i18n);
+      break;
+    case 'dataLoading.state':
+    case 'dataLoading.error':
+    case 'feeds':
+    case 'posts':
+      currentState = state.dataLoading.state;
+      renderDataLoading(state, currentState, elements, i18n);
+      break;
+    case 'uiState.state':
+      renderUpdatedFeed(elements, state, i18n);
+      break;
+    case 'uiState.seenPosts':
+      markLinkVisited(_.last(seenPosts));
+      break;
+    default:
+      throw new Error(`Unexpected path: ${path}`);
   }
 };
 

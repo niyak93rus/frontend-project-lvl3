@@ -41,7 +41,7 @@ const loadPosts = (userUrl, state) => {
       state.dataLoading.error = '';
     })
     .catch((error) => {
-      state.dataLoading.error = error.message;
+      state.dataLoading.error = axios.isAxiosError(error) ? 'networkError' : 'invalidRSS';
       state.dataLoading.state = 'failed';
       console.error(error);
       state.dataLoading.state = 'waiting';
@@ -59,6 +59,8 @@ const updateFeed = (state) => {
           .filter((post) => !state.posts.map((item) => item.link).includes(post.link));
         if (newPosts.length > 0) {
           state.posts.push(...newPosts.map((post) => ({ ...post, postId: uniqueId() })));
+          state.uiState.state = 'updatingFeed';
+          state.uiState.state = 'waiting';
         }
       })
       .catch((error) => {
@@ -95,6 +97,10 @@ const runApp = (state, elements) => {
     state.uiState.seenPosts.add(postId);
   });
 };
+
+const watch = (state, i18n, elements) => onChange(state, (path) => {
+  render(state, path, i18n, elements);
+});
 
 export default () => {
   const i18n = i18next.createInstance();
@@ -134,9 +140,7 @@ export default () => {
         feedback: document.createElement('p'),
       };
 
-      const watchedState = onChange(state, (path) => {
-        render(state, path, i18n, elements);
-      });
+      const watchedState = watch(state, i18n, elements);
 
       runApp(watchedState, elements);
     })
