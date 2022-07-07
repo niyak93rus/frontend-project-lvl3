@@ -1,6 +1,7 @@
+import onChange from 'on-change';
 import _ from 'lodash';
 
-const renderModal = (post) => {
+const renderModal = (post, i18n) => {
   const postModal = document.getElementById('modal');
   const modalTitle = postModal.querySelector('.modal-title');
   const modalBody = postModal.querySelector('.modal-body');
@@ -15,12 +16,12 @@ const renderModal = (post) => {
   footerLink.classList.add('btn', 'btn-primary', 'full-article');
   footerLink.href = post.link;
   footerLink.target = '_blank';
-  footerLink.textContent = 'Читать полностью';
+  footerLink.textContent = i18n.t('openFull');
 
   const footerButton = document.createElement('button');
   footerButton.classList.add('btn', 'btn-secondary');
   footerButton.dataset.bsDismiss = 'modal';
-  footerButton.textContent = 'Закрыть';
+  footerButton.textContent = i18n.t('close');
   footerButton.type = 'button';
 
   modalFooter.append(footerLink, footerButton);
@@ -67,23 +68,23 @@ const renderPosts = (state, postsArea, posts, i18n) => {
     }
 
     postCard.querySelector('button').addEventListener('click', () => {
-      renderModal(post);
+      renderModal(post, i18n);
     });
 
     postsArea.prepend(postCard);
   });
 };
 
-const createHtmlStructure = () => {
+const createHtmlStructure = (i18n) => {
   const feedsArea = document.querySelector('.feeds');
   const postsArea = document.querySelector('.posts');
   const feedsAreaHeader = document.createElement('h2');
   feedsAreaHeader.classList.add('card-title', 'h4');
-  feedsAreaHeader.textContent = 'Фиды';
+  feedsAreaHeader.textContent = i18n.t('feeds');
 
   const postsAreaHeader = document.createElement('h2');
   postsAreaHeader.classList.add('card-title', 'h4');
-  postsAreaHeader.textContent = 'Посты';
+  postsAreaHeader.textContent = i18n.t('posts');
 
   const feedsList = document.createElement('ul');
   feedsList.classList.add('feed-list', 'list-group', 'card', 'border-0');
@@ -108,7 +109,7 @@ const pastePosts = (state, i18n) => {
     feedsListItem.classList.add('list-group-item', 'feed-card', 'border-0');
 
     const feedTitle = document.createElement('h3');
-    feedTitle.textContent = `${title}`;
+    feedTitle.textContent = title;
 
     const feedDescription = document.createElement('p');
     feedDescription.textContent = description;
@@ -129,7 +130,7 @@ const renderFeeds = (state, i18n) => {
   if (state.feeds > 1) {
     pastePosts(state, i18n);
   } else {
-    createHtmlStructure();
+    createHtmlStructure(i18n);
     pastePosts(state, i18n);
   }
 };
@@ -154,7 +155,7 @@ const showErrorMessage = (state, elements, process, i18n) => {
   clearFeedback();
   const { column, input, feedback } = elements;
   if (process === 'validation') {
-    feedback.innerHTML = i18n.t(state.formValidation.error);
+    feedback.innerHTML = i18n.t(`${state.formValidation.error}`);
   }
   if (process === 'loading') {
     feedback.innerHTML = i18n.t(`${state.dataLoading.error}`);
@@ -162,7 +163,7 @@ const showErrorMessage = (state, elements, process, i18n) => {
   input.classList.remove('is-valid');
   input.classList.add('is-invalid');
   feedback.classList.remove('text-success', 'text-warning');
-  feedback.classList.add('text-danger');
+  feedback.classList.add('text-danger', 'm-0', 'small', 'feedback');
   column.append(feedback);
 };
 
@@ -175,7 +176,7 @@ const showSuccessMessage = (elements, i18n) => {
   input.classList.add('is-valid');
   feedback.innerHTML = i18n.t('successMessage');
   feedback.classList.remove('text-danger', 'text-warning');
-  feedback.classList.add('text-success');
+  feedback.classList.add('text-success', 'm-0', 'small', 'feedback');
   column.append(feedback);
 };
 
@@ -191,7 +192,8 @@ const unblockUI = (elements) => {
   input.readOnly = false;
 };
 
-const renderFormValidation = (state, currentState, elements, i18n) => {
+const renderFormValidation = (state, elements, i18n) => {
+  const currentState = state.formValidation.state;
   switch (currentState) {
     case 'valid':
       clearFeedback();
@@ -208,13 +210,14 @@ const renderFormValidation = (state, currentState, elements, i18n) => {
   }
 };
 
-const renderDataLoading = (state, currentState, elements, i18n) => {
+const renderDataLoading = (state, elements, i18n) => {
+  const currentState = state.dataLoading.state;
   const { column, feedback } = elements;
   switch (currentState) {
     case 'processing':
+      feedback.classList.remove('text-success', 'text-danger');
+      feedback.classList.add('text-warning', 'm-0', 'small', 'feedback');
       feedback.textContent = i18n.t('loading');
-      feedback.remove('text-success', 'text-danger');
-      feedback.classList.add('text-warning');
       column.append(feedback);
       blockUI(elements);
       break;
@@ -235,34 +238,30 @@ const renderDataLoading = (state, currentState, elements, i18n) => {
 };
 
 const render = (state, path, i18n, elements) => {
-  const { feedback } = elements;
-  feedback.classList.add('m-0', 'small', 'feedback');
-
-  let currentState;
-  const seenPosts = Array.from(state.uiState.seenPosts);
-
   switch (path) {
     case 'formValidation.state':
     case 'formValidation.error':
-      currentState = state.formValidation.state;
-      renderFormValidation(state, currentState, elements, i18n);
+      renderFormValidation(state, elements, i18n);
       break;
     case 'dataLoading.state':
     case 'dataLoading.error':
     case 'feeds':
     case 'posts':
-      currentState = state.dataLoading.state;
-      renderDataLoading(state, currentState, elements, i18n);
+      renderDataLoading(state, elements, i18n);
       break;
     case 'uiState.state':
       renderUpdatedFeed(elements, state, i18n);
       break;
     case 'uiState.seenPosts':
-      markLinkVisited(_.last(seenPosts));
+      markLinkVisited(_.last(Array.from(state.uiState.seenPosts)));
       break;
     default:
       throw new Error(`Unexpected path: ${path}`);
   }
 };
 
-export default render;
+const watch = (state, i18n, elements) => onChange(state, (path) => {
+  render(state, path, i18n, elements);
+});
+
+export default watch;

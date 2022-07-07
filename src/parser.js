@@ -10,7 +10,7 @@ export default (data, formatName) => {
   const document = parser.parseFromString(data, formatName);
   const errorNode = document.querySelector('parsererror');
   if (errorNode) {
-    throw new Error(`${errorNode.querySelector('div').textContent}`);
+    throw new Error('Parsing Error');
   }
 
   const channel = document.querySelector('channel');

@@ -13,14 +13,19 @@ setLocale({
 
 const resources = {
   translation: {
-    emptyError: 'Не должно быть пустым',
-    validError: 'Ссылка должна быть валидным URL',
-    successMessage: 'RSS успешно загружен',
-    existsError: 'RSS уже существует',
-    invalidRSS: 'Ресурс не содержит валидный RSS',
-    networkError: 'Ошибка сети',
     buttonTextShow: 'Просмотр',
+    close: 'Закрыть',
+    defaultError: 'Что-то пошло не так',
+    emptyError: 'Не должно быть пустым',
+    existsError: 'RSS уже существует',
+    feeds: 'Фиды',
+    invalidRSS: 'Ресурс не содержит валидный RSS',
     loading: 'Идет загрузка',
+    networkError: 'Ошибка сети',
+    openFull: 'Читать полностью',
+    posts: 'Посты',
+    successMessage: 'RSS успешно загружен',
+    validError: 'Ссылка должна быть валидным URL',
   },
 };
 

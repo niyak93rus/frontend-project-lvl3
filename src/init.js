@@ -3,11 +3,10 @@ import 'bootstrap';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
 import i18next from 'i18next';
-import onChange from 'on-change';
 import { object, string } from 'yup';
-import render from './render.js';
 import parse from './parser.js';
 import ru from './resources.js';
+import watch from './render.js';
 
 const DELAY = 5000;
 
@@ -27,6 +26,17 @@ const validateForm = (state, url) => {
   return schema.validate({ url });
 };
 
+const handleErrors = (error) => {
+  switch (error.message) {
+    case 'Network Error':
+      return 'networkError';
+    case 'Parsing Error':
+      return 'invalidRSS';
+    default:
+      return 'defaultError';
+  }
+};
+
 const loadPosts = (userUrl, state) => {
   state.dataLoading.state = 'processing';
   const url = addProxy(userUrl);
@@ -41,7 +51,7 @@ const loadPosts = (userUrl, state) => {
       state.dataLoading.state = 'waiting';
     })
     .catch((error) => {
-      state.dataLoading.error = axios.isAxiosError(error) ? 'networkError' : 'invalidRSS';
+      state.dataLoading.error = handleErrors(error);
       state.dataLoading.state = 'failed';
       console.error(error);
       state.dataLoading.state = 'waiting';
@@ -98,10 +108,6 @@ const runApp = (state, elements) => {
   });
 };
 
-const watch = (state, i18n, elements) => onChange(state, (path) => {
-  render(state, path, i18n, elements);
-});
-
 export default () => {
   const i18n = i18next.createInstance();
   return i18n.init({
@@ -118,7 +124,7 @@ export default () => {
           error: null,
         },
         dataLoading: {
-          state: 'processing',
+          state: 'waiting',
           error: null,
         },
         uiState: {
