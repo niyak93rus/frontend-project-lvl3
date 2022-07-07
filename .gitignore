@@ -2,4 +2,4 @@
 *.log
 public
 assets
-.vscode
+/.vscode/
