@@ -1,9 +1,8 @@
-/* eslint-disable no-param-reassign */
 import 'bootstrap';
 import axios from 'axios';
-import { uniqueId } from 'lodash';
 import i18next from 'i18next';
 import { object, string } from 'yup';
+import { uniqueId } from 'lodash';
 import parse from './parser.js';
 import ru from './resources.js';
 import watch from './render.js';

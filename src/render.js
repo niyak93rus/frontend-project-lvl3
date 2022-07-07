@@ -67,10 +67,6 @@ const renderPosts = (state, postsArea, posts, i18n) => {
       postCard.querySelector('a').classList.add('link-secondary');
     }
 
-    postCard.querySelector('button').addEventListener('click', () => {
-      renderModal(post, i18n);
-    });
-
     postsArea.prepend(postCard);
   });
 };
@@ -238,6 +234,8 @@ const renderDataLoading = (state, elements, i18n) => {
 };
 
 const render = (state, path, i18n, elements) => {
+  const lastPostId = _.last(Array.from(state.uiState.seenPosts));
+  const lastPost = state.posts.find((post) => post.postId === lastPostId);
   switch (path) {
     case 'formValidation.state':
     case 'formValidation.error':
@@ -253,7 +251,8 @@ const render = (state, path, i18n, elements) => {
       renderUpdatedFeed(elements, state, i18n);
       break;
     case 'uiState.seenPosts':
-      markLinkVisited(_.last(Array.from(state.uiState.seenPosts)));
+      markLinkVisited(lastPostId);
+      renderModal(lastPost, i18n);
       break;
     default:
       throw new Error(`Unexpected path: ${path}`);
